@@ -23,7 +23,6 @@ Configuration
         direct:
             id: your seller id
             pin: your URLC PIN number (PIN number should consist of 16 characters)
-            url: the paypal url (Optional, default : https://ssl.dotpay.pl/ )
+            url: the dotpay url (Optional, default : https://ssl.dotpay.pl/ )
             type: defines a method of redirection to the seller’s web page (Optional, default: 2)
-            return_url: The url of the return button
-            cancel_url: The url of the cancel button
+            return_url: The url of the return button (Optional)

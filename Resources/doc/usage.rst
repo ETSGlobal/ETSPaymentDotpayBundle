@@ -33,9 +33,6 @@ You can configure some custom fields :
                         'return_url' => $this->router->generate('payment_complete', array(
                             'orderNumber' => $order->getOrderNumber(),
                         ), true),
-                        'cancel_url' => $this->router->generate('payment_cancel', array(
-                            'orderNumber' => $order->getOrderNumber(),
-                        ), true)
                     ),
                 ),
             ));
