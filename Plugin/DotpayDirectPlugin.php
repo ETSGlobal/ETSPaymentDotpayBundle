@@ -125,7 +125,6 @@ class DotpayDirectPlugin extends AbstractPlugin
         $this->deposit($transaction, $retry);
     }
 
-
     /**
      * @param FinancialTransactionInterface $transaction
      *
@@ -137,9 +136,9 @@ class DotpayDirectPlugin extends AbstractPlugin
         $actionRequest->setFinancialTransaction($transaction);
 
         $extendedData = $transaction->getExtendedData();
-        $urlc = $this->router->generate('ets_payment_dotpay_callback_urlc', array(
-            'id' => $transaction->getId()), true
-        );
+        $urlc         = $this->router->generate('ets_payment_dotpay_callback_urlc', array(
+            'id' => $transaction->getPayment()->getPaymentInstruction()->getId()
+        ), true);
 
         $datas = array(
             'id'                => $this->token->getId(),
