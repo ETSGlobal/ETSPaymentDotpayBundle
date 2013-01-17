@@ -142,7 +142,6 @@ class DotpayDirectPlugin extends AbstractPlugin
 
         $datas = array(
             'id'                => $this->token->getId(),
-            'pin'               => $this->token->getPin(),
             'url'               => $this->getReturnUrl($extendedData),
             'URLC'              => $urlc,
             'type'              => $this->type,

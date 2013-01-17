@@ -64,7 +64,7 @@ class CallbackController extends Controller
         } catch (FinancialException $e) {
             $this->get('logger')->warn(sprintf('[Dotpay - URLC] %s', $e->getMesssage()));
 
-            return new Response('OK');
+            return new Response('NOK');
         }
 
         $this->get('logger')->info(sprintf('[Dotpay - URLC] Payment instruction %s successfully updated', $instruction->getId()));
