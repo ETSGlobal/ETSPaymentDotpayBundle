@@ -36,6 +36,8 @@ use ETS\Payment\DotpayBundle\Tools\String;
 
 /**
  * Dotpay payment plugin
+ *
+ * @author ETSGlobal <e4-devteam@etsglobal.org>
  */
 class DotpayDirectPlugin extends AbstractPlugin
 {

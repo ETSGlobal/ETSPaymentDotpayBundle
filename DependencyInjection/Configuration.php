@@ -23,6 +23,8 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
  * Bundle Configuration
+ *
+ * @author ETSGlobal <e4-devteam@etsglobal.org>
  */
 class Configuration implements ConfigurationInterface
 {

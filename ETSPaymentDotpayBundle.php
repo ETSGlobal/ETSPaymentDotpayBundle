@@ -22,6 +22,8 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
  * ETS Payment Dotpay Bundle
+ *
+ * @author ETSGlobal <e4-devteam@etsglobal.org>
  */
 class ETSPaymentDotpayBundle extends Bundle
 {

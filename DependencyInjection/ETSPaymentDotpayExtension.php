@@ -26,6 +26,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Bundle Extension class
+ *
+ * @author ETSGlobal <e4-devteam@etsglobal.org>
  */
 class ETSPaymentDotpayExtension extends Extension
 {

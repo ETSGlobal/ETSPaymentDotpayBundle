@@ -1,8 +1,8 @@
 <?php
 
-namespace ETS\Payment\DotpayBundle\Client;
+namespace ETS\PurchaseBundle\Tests\Tools;
 
-use ETS\Payment\DotpayBundle\Client\TokenInterface;
+use ETS\Payment\DotpayBundle\Tools\String;
 
 /*
  * Copyright 2012 ETSGlobal <e4-devteam@etsglobal.org>
@@ -21,38 +21,31 @@ use ETS\Payment\DotpayBundle\Client\TokenInterface;
  */
 
 /**
- * Token
+ * String Tests
  *
  * @author ETSGlobal <e4-devteam@etsglobal.org>
  */
-class Token implements TokenInterface
+class StringTest extends \PHPUnit_Framework_TestCase
 {
-    protected $id;
-    protected $pin;
-
     /**
-     * @param string $id  The Seller ID
-     * @param string $pin The URLC PIN
+     * @return array
      */
-    public function __construct($id, $pin)
+    public function normalizeProvider()
     {
-        $this->id = $id;
-        $this->pin = $pin;
+        return array(
+            array("Clément", "Clement"),
+            array("eéèêëiîïoöôuùûüaâäÅ Ἥ ŐǟǠ ǺƶƈƉųŪŧȬƀ␢ĦŁȽŦ ƀǖ", "eeeeeiiiooouuuuaaaA Η OaA AƶƈƉuUŧOƀ␢ĦŁȽŦ ƀu"),
+            array("Fóø Bår", "Foø Bar"),
+        );
     }
 
     /**
-     * @return string
+     * @dataProvider normalizeProvider
      */
-    public function getId()
+    public function testNormaize($input, $expected)
     {
-        return $this->id;
-    }
+        $tool = new String();
 
-    /**
-     * @return string
-     */
-    public function getPin()
-    {
-        return $this->pin;
+        $this->assertEquals($expected, $tool->normalize($input));
     }
 }
