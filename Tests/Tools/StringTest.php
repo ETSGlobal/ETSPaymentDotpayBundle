@@ -40,6 +40,9 @@ class StringTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $input    Input string
+     * @param string $expected Expected output string
+     *
      * @dataProvider normalizeProvider
      */
     public function testNormaize($input, $expected)
