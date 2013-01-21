@@ -47,15 +47,14 @@ class CallbackController extends Controller
             new DotpayConfirmationReceivedEvent($instruction, $request->request)
         );
 
-        // Check the PIN
-        $pin = $this->container->getParameter('payment.dotpay.direct.pin');
-        $id = $this->container->getParameter('payment.dotpay.direct.id');
+        $client = $this->get('payment.dotpay.client.token');
         $logger = $this->get('logger');
 
+        // Check the PIN
         $control = md5(sprintf(
             "%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s",
-            $pin,
-            $id,
+            $client->getPin(),
+            $client->getId(),
             $request->request->get('control'),
             $request->request->get('t_id'),
             $request->request->get('amount'),
