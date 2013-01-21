@@ -90,6 +90,8 @@ class CallbackController extends Controller
             return new Response('FAIL');
         }
 
+        $this->getDoctrine()->getEntityManager()->flush();
+
         $logger->info(sprintf('[Dotpay - URLC] Payment instruction %s successfully updated', $instruction->getId()));
 
         return new Response('OK');
