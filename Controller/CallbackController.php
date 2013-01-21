@@ -7,9 +7,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
 use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
-use JMS\Payment\CoreBundle\Model\PaymentInstructionInterface;
-use ETS\Payment\DotpayBundle\Plugin\DotpayDirectPlugin;
 use JMS\Payment\CoreBundle\Plugin\Exception\FinancialException;
+use ETS\Payment\DotpayBundle\Event\DotpayConfirmationReceivedEvent;
+use ETS\Payment\DotpayBundle\Event\Events as DotpayEvents;
 
 /*
  * Copyright 2012 ETSGlobal <e4-devteam@etsglobal.org>
@@ -42,6 +42,11 @@ class CallbackController extends Controller
      */
     public function urlcAction(Request $request, PaymentInstruction $instruction)
     {
+        $this->get('event_dispatcher')->dispatch(
+            DotpayEvents::PAYMENT_DOTPAY_CONFIRMATION_RECEIVED,
+            new DotpayConfirmationReceivedEvent($instruction, $request->request)
+        );
+
         // Check the PIN
         $pin = $this->container->getParameter('payment.dotpay.direct.pin');
         $id = $this->container->getParameter('payment.dotpay.direct.id');
