@@ -137,9 +137,11 @@ class DotpayDirectPlugin extends AbstractPlugin
         $actionRequest = new ActionRequiredException('Redirecting to DotPay.');
         $actionRequest->setFinancialTransaction($transaction);
 
+        $instruction = $transaction->getPayment()->getPaymentInstruction();
+
         $extendedData = $transaction->getExtendedData();
         $urlc         = $this->router->generate('ets_payment_dotpay_callback_urlc', array(
-            'id' => $transaction->getPayment()->getPaymentInstruction()->getId()
+            'id' => $instruction->getId()
         ), true);
 
         $datas = array(
@@ -149,8 +151,8 @@ class DotpayDirectPlugin extends AbstractPlugin
             'type'              => $this->type,
 
             'amount'      => $transaction->getRequestedAmount(),
-            'currency'    => $transaction->getPayment()->getPaymentInstruction()->getCurrency(),
-            'description' => sprintf('Transaction #%d', $transaction->getId()),
+            'currency'    => $instruction->getCurrency(),
+            'description' => sprintf('Payment Instruction #%d', $instruction->getId()),
         );
 
         $additionalDatas = array(

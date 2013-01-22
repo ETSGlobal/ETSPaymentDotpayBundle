@@ -78,16 +78,19 @@ class CallbackController extends Controller
             return new Response('FAIL', 500);
         }
 
+        $amountParts = explode(' ', $request->get('orginal_amount'));
+        $amount = (float) $amountParts[0];
+
         $transaction->getExtendedData()->set('t_status', $request->get('t_status'));
         $transaction->getExtendedData()->set('t_id', $request->get('t_id'));
-        $transaction->getExtendedData()->set('amount', $request->get('amount'));
+        $transaction->getExtendedData()->set('amount', $amount);
 
         try {
-            $this->get('payment.plugin.dotpay_direct')->approveAndDeposit($transaction, $request->get('amount'));
-        } catch (FinancialException $e) {
-            $logger->warn(sprintf('[Dotpay - URLC] %s', $e->getMesssage()));
+            $this->get('payment.plugin_controller')->approveAndDeposit($transaction->getPayment()->getId(), $amount);
+        } catch (\Exception $e) {
+            $logger->err(sprintf('[Dotpay - URLC] %s', $e->getMessage()));
 
-            return new Response('FAIL');
+            return new Response('FAIL', 500);
         }
 
         $this->getDoctrine()->getEntityManager()->flush();
