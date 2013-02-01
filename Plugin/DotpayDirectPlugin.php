@@ -14,6 +14,8 @@ use JMS\Payment\CoreBundle\Plugin\Exception\TimeoutException;
 use JMS\Payment\CoreBundle\Plugin\ErrorBuilder;
 use JMS\Payment\CoreBundle\Plugin\Exception\FinancialException;
 use JMS\Payment\CoreBundle\Plugin\PluginInterface;
+use JMS\Payment\CoreBundle\Plugin\Exception\BlockedException;
+use JMS\Payment\CoreBundle\Entity\ExtendedData;
 
 use ETS\Payment\DotpayBundle\Client\Token;
 use ETS\Payment\DotpayBundle\Tools\String;
@@ -192,6 +194,8 @@ class DotpayDirectPlugin extends AbstractPlugin
     {
         $data = $transaction->getExtendedData();
 
+        $this->checkExtendedDataBeforeApproveAndDeposit($data);
+
         switch ($data->get('t_status')) {
             case self::STATUS_NEW:
                 // TODO: The status should not be NEW at this point, I think
@@ -235,6 +239,8 @@ class DotpayDirectPlugin extends AbstractPlugin
     {
         $data = $transaction->getExtendedData();
 
+        $this->checkExtendedDataBeforeApproveAndDeposit($data);
+
         switch ($data->get('t_status')) {
             case self::STATUS_CLOSED:
                 $ex = new TimeoutException('PaymentAction closed');
@@ -273,6 +279,23 @@ class DotpayDirectPlugin extends AbstractPlugin
         $transaction->setProcessedAmount($data->get('amount'));
         $transaction->setResponseCode(PluginInterface::RESPONSE_CODE_SUCCESS);
         $transaction->setReasonCode(PluginInterface::REASON_CODE_SUCCESS);
+    }
+
+    /**
+     * Check that the extended data contains the needed values
+     * before approving and depositing the transation
+     *
+     * @param ExtendedData $data
+     *
+     * @throws BlockedException
+     */
+    protected function checkExtendedDataBeforeApproveAndDeposit(ExtendedData $data) {
+
+        if (!$data->has('t_status') || !$data->has('t_id') || !$data->has('amount')) {
+            // if these data are missing, we should wait the response from DotPay
+            // and the transaction should stay in pending state
+            throw new BlockedException();
+        }
     }
 
     /**

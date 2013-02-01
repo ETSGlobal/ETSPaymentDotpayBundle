@@ -1,8 +1,6 @@
 <?php
 
-namespace ETS\PurchaseBundle\Tests\Controller;
-
-use JMS\Payment\CoreBundle\Model\PaymentInstructionInterface;
+namespace ETS\Payment\DotpayBundle\Tests\Controller;
 
 use ETS\Payment\DotpayBundle\Test\ContainerAwareWebTestCase;
 use ETS\Payment\DotpayBundle\Plugin\DotpayDirectPlugin;
@@ -10,6 +8,7 @@ use ETS\Payment\DotpayBundle\Plugin\DotpayDirectPlugin;
 use JMS\Payment\CoreBundle\Plugin\Exception\ActionRequiredException;
 use JMS\Payment\CoreBundle\PluginController\Result;
 use JMS\Payment\CoreBundle\Plugin\Exception\Action\VisitUrl;
+use JMS\Payment\CoreBundle\Model\PaymentInstructionInterface;
 
 /*
  * Copyright 2012 ETSGlobal <e4-devteam@etsglobal.org>
@@ -134,6 +133,7 @@ class CallbackControllerTest extends ContainerAwareWebTestCase
             'id' => 424242,
             't_id' => '424242-TST1',
             'control' => '',
+            'orginal_amount' => '42.00 EUR',
             'amount' => 42.00,
             'email' => 'clement.gautier.76@gmail.com',
             'description' => 'Test transaction',
