@@ -294,7 +294,7 @@ class DotpayDirectPlugin extends AbstractPlugin
         if (!$data->has('t_status') || !$data->has('t_id') || !$data->has('amount')) {
             // if these data are missing, we should wait the response from DotPay
             // and the transaction should stay in pending state
-            throw new BlockedException();
+            throw new BlockedException("Awaiting extended data from DotPay");
         }
     }
 
