@@ -2,6 +2,7 @@
 
 namespace ETS\Payment\DotpayBundle\Plugin;
 
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Router;
 
 use JMS\Payment\CoreBundle\Model\ExtendedDataInterface;
@@ -18,6 +19,8 @@ use JMS\Payment\CoreBundle\Plugin\Exception\BlockedException;
 use JMS\Payment\CoreBundle\Entity\ExtendedData;
 
 use ETS\Payment\DotpayBundle\Client\TokenInterface;
+use ETS\Payment\DotpayBundle\Event\DotpayPreSetPaymentUrlEvent;
+use ETS\Payment\DotpayBundle\Event\Events as DotpayEvents;
 use ETS\Payment\DotpayBundle\Tools\String;
 
 /*
@@ -63,6 +66,11 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @var Router
      */
     protected $router;
+    
+    /**
+     * @var EventDispatcherInterface
+     */
+    protected $dispatcher;
 
     /**
      * @var \ETS\Payment\DotpayBundle\Client\TokenInterface
@@ -90,16 +98,18 @@ class DotpayDirectPlugin extends AbstractPlugin
     protected $type;
 
     /**
-     * @param Router  $router      The router
-     * @param Token   $token       The client token
-     * @param String  $stringTools The String tool package
-     * @param string  $url         The urlc
-     * @param integer $type        The type
-     * @param string  $returnUrl   The return url
+     * @param Router                   $router      The router
+     * @param EventDispatcherInterface $dispatcher  Event dispatcher
+     * @param Token                    $token       The client token
+     * @param String                   $stringTools The String tool package
+     * @param string                   $url         The urlc
+     * @param integer                  $type        The type
+     * @param string                   $returnUrl   The return url
      */
-    public function __construct(Router $router, TokenInterface $token, String $stringTools, $url, $type, $returnUrl)
+    public function __construct(Router $router, EventDispatcherInterface $dispatcher, TokenInterface $token, String $stringTools, $url, $type, $returnUrl)
     {
         $this->router = $router;
+        $this->dispatcher = $dispatcher;
         $this->token = $token;
         $this->stringTools = $stringTools;
         $this->returnUrl = $returnUrl;
@@ -140,20 +150,20 @@ class DotpayDirectPlugin extends AbstractPlugin
         $actionRequest->setFinancialTransaction($transaction);
 
         $instruction = $transaction->getPayment()->getPaymentInstruction();
-
         $extendedData = $transaction->getExtendedData();
-        $urlc         = $this->router->generate('ets_payment_dotpay_callback_urlc', array(
+        
+        $urlc = $this->router->generate('ets_payment_dotpay_callback_urlc', array(
             'id' => $instruction->getId()
         ), true);
 
         $datas = array(
             'id'                => $this->token->getId(),
             'url'               => $this->getReturnUrl($extendedData),
+            //'cancel_return_url' => 
             'URLC'              => $urlc,
             'type'              => $this->type,
-
-            'amount'   => $transaction->getRequestedAmount(),
-            'currency' => $instruction->getCurrency()
+            'amount'            => $transaction->getRequestedAmount(),
+            'currency'          => $instruction->getCurrency()
         );
         
         if ($extendedData->has('description')) {
@@ -176,8 +186,11 @@ class DotpayDirectPlugin extends AbstractPlugin
         if ($extendedData->has('lang')) {
             $datas['lang'] = substr($extendedData->get('lang'), 0, 2);
         }
-
-        $actionRequest->setAction(new VisitUrl($this->url . '?' . http_build_query($datas)));
+        
+        $event = new DotpayPreSetPaymentUrlEvent($transaction, $this->url, $datas);
+        $this->dispatcher->dispatch(DotpayEvents::PAYMENT_DOTPAY_PRE_SET_PAYMENT_URL, $event);
+        
+        $actionRequest->setAction(new VisitUrl($event->getBaseUrl() . '?' . http_build_query($event->getQueryParameters())));
 
         return $actionRequest;
     }
