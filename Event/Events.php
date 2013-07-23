@@ -29,6 +29,8 @@ abstract class Events
      * This event is dispatched when the urlc action is called by dotpay.
      */
     const PAYMENT_DOTPAY_CONFIRMATION_RECEIVED = 'payment.dotpay.confirmation_received';
+    
+    const PAYMENT_DOTPAY_PRE_SET_PAYMENT_URL = 'payment.dotpay.pre_set_payment_url';
 
     private final function __construct() { }
 }
