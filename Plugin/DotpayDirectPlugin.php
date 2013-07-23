@@ -157,12 +157,12 @@ class DotpayDirectPlugin extends AbstractPlugin
         ), true);
 
         $datas = array(
-            'id'                => $this->token->getId(),
-            'url'               => $this->getReturnUrl($extendedData),
-            'URLC'              => $urlc,
-            'type'              => $this->type,
-            'amount'            => $transaction->getRequestedAmount(),
-            'currency'          => $instruction->getCurrency()
+            'id'       => $this->token->getId(),
+            'url'      => $this->getReturnUrl($extendedData),
+            'URLC'     => $urlc,
+            'type'     => $this->type,
+            'amount'   => $transaction->getRequestedAmount(),
+            'currency' => $instruction->getCurrency()
         );
         
         if ($extendedData->has('description')) {
@@ -170,10 +170,20 @@ class DotpayDirectPlugin extends AbstractPlugin
         } else {
             $datas['description'] = sprintf('Payment Instruction #%d', $instruction->getId());
         }
+        
+        if ($extendedData->has('lang')) {
+            $datas['lang'] = substr($extendedData->get('lang'), 0, 2);
+        } else {
+            $datas['lang'] = 'en';
+        }
 
         $additionalDatas = array(
+            'channel', 'ch_lock', 'onlinetransfer',
+            'buttontext', 'street_n1', 'street_n2',
             'street', 'phone', 'postcode', 'lastname',
-            'firstname', 'email', 'country', 'city'
+            'firstname', 'email', 'country', 'city',
+            'addr2', 'addr3', 'code', 'p_info', 'p_email',
+            'tax', 'back_button_url'
         );
 
         foreach ($additionalDatas as $value) {
@@ -182,10 +192,6 @@ class DotpayDirectPlugin extends AbstractPlugin
             }
         }
 
-        if ($extendedData->has('lang')) {
-            $datas['lang'] = substr($extendedData->get('lang'), 0, 2);
-        }
-        
         $event = new DotpayPreSetPaymentUrlEvent($transaction, $this->url, $datas);
         $this->dispatcher->dispatch(DotpayEvents::PAYMENT_DOTPAY_PRE_SET_PAYMENT_URL, $event);
         
