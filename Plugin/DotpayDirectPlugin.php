@@ -152,10 +152,15 @@ class DotpayDirectPlugin extends AbstractPlugin
             'URLC'              => $urlc,
             'type'              => $this->type,
 
-            'amount'      => $transaction->getRequestedAmount(),
-            'currency'    => $instruction->getCurrency(),
-            'description' => sprintf('Payment Instruction #%d', $instruction->getId()),
+            'amount'   => $transaction->getRequestedAmount(),
+            'currency' => $instruction->getCurrency()
         );
+        
+        if ($extendedData->has('description')) {
+            $datas['description'] = $extendedData->get('description');
+        } else {
+            $datas['description'] = sprintf('Payment Instruction #%d', $instruction->getId());
+        }
 
         $additionalDatas = array(
             'street', 'phone', 'postcode', 'lastname',
