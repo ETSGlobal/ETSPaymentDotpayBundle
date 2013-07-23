@@ -17,7 +17,7 @@ use JMS\Payment\CoreBundle\Plugin\PluginInterface;
 use JMS\Payment\CoreBundle\Plugin\Exception\BlockedException;
 use JMS\Payment\CoreBundle\Entity\ExtendedData;
 
-use ETS\Payment\DotpayBundle\Client\Token;
+use ETS\Payment\DotpayBundle\Client\TokenInterface;
 use ETS\Payment\DotpayBundle\Tools\String;
 
 /*
@@ -65,7 +65,7 @@ class DotpayDirectPlugin extends AbstractPlugin
     protected $router;
 
     /**
-     * @var \ETS\Payment\DotpayBundle\Client\Token
+     * @var \ETS\Payment\DotpayBundle\Client\TokenInterface
      */
     protected $token;
 
@@ -97,7 +97,7 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @param integer $type        The type
      * @param string  $returnUrl   The return url
      */
-    public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl)
+    public function __construct(Router $router, TokenInterface $token, String $stringTools, $url, $type, $returnUrl)
     {
         $this->router = $router;
         $this->token = $token;
