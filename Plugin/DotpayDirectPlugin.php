@@ -159,7 +159,6 @@ class DotpayDirectPlugin extends AbstractPlugin
         $datas = array(
             'id'                => $this->token->getId(),
             'url'               => $this->getReturnUrl($extendedData),
-            //'cancel_return_url' => 
             'URLC'              => $urlc,
             'type'              => $this->type,
             'amount'            => $transaction->getRequestedAmount(),
