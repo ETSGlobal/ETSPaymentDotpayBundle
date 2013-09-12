@@ -159,7 +159,7 @@ class DotpayDirectPlugin extends AbstractPlugin
 
         $additionalDatas = array(
             'street', 'phone', 'postcode', 'lastname',
-            'firstname', 'email', 'country', 'city'
+            'firstname', 'email', 'country', 'city', 'grupykanalow',
         );
 
         foreach ($additionalDatas as $value) {
