@@ -84,6 +84,7 @@ class CallbackController extends Controller
         $transaction->getExtendedData()->set('t_status', $request->get('t_status'));
         $transaction->getExtendedData()->set('t_id', $request->get('t_id'));
         $transaction->getExtendedData()->set('amount', $amount);
+        $transaction->getExtendedData()->set('pln_amount', (float) $request->get('amount'));
 
         try {
             $this->get('payment.plugin_controller')->approveAndDeposit($transaction->getPayment()->getId(), $amount);
