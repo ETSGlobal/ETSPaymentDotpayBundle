@@ -1,5 +1,5 @@
 {
-    "name": "ets/payment-dotpay-bundle",
+    "name": "pawellen-test/payment-dotpay-bundle",
     "type": "symfony-bundle",
     "description": "Payment Bundle providing access to the Dotpay API",
     "keywords": ["payment", "dotpay"],
