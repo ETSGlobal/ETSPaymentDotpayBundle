@@ -108,7 +108,7 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @param integer $type        The type
      * @param string  $returnUrl   The return url
      */
-    public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl, $chk)
+    public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl, $chk = false)
     {
         $this->router = $router;
         $this->token = $token;
