@@ -88,6 +88,17 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @var integer
      */
     protected $type;
+    
+    /**
+     * @var integer
+     */
+    protected $type;
+
+    /**
+     * @var boolean
+     */
+    protected $chk;
+    
 
     /**
      * @param Router  $router      The router
@@ -97,7 +108,7 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @param integer $type        The type
      * @param string  $returnUrl   The return url
      */
-    public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl)
+    public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl, $chk)
     {
         $this->router = $router;
         $this->token = $token;
@@ -105,6 +116,7 @@ class DotpayDirectPlugin extends AbstractPlugin
         $this->returnUrl = $returnUrl;
         $this->url = $url;
         $this->type = $type;
+        $this->chk = $chk ? true : false;
     }
 
     /**
@@ -171,10 +183,37 @@ class DotpayDirectPlugin extends AbstractPlugin
         if ($extendedData->has('lang')) {
             $datas['lang'] = substr($extendedData->get('lang'), 0, 2);
         }
+        
+        if ($this->chk) {
+            $datas['chk'] = $this->generateChk($datas, $this->token->getPin());
+        }
 
         $actionRequest->setAction(new VisitUrl($this->url . '?' . http_build_query($datas)));
 
         return $actionRequest;
+    }
+    
+    /**
+     * This method generates chk parameter user to sign request to dotpay
+     * 
+     * @param array $datas
+     * @param string $pin
+     */
+    protected function generateChk(array $datas, $pin)
+    {
+        $fields = array('id', 'amount', 'currency', 'description', 'control', 'PIN');
+        if (!empty($datas['channel'])) {
+            $fields = array_merge($fields, array('channel', 'chlock'));
+        }
+        $data = '';
+        foreach ($fields as $f) {
+            if ($f === 'PIN') {
+                $data .= $pin;
+            } else {
+                $data .= isset($datas[ $f ]) ? $datas[ $f ] : '';
+            }
+        }
+        return md5($data);
     }
 
     /**

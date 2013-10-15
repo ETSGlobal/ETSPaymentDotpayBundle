@@ -64,7 +64,15 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                             ->scalarNode('return_url')->defaultNull()->end()
+                            ->scalarNode('chk')
+                                ->defaultValue(false)
+                                ->validate()
+                                    ->ifNotInArray(array(true, false))
+                                    ->thenInvalid('Invalid type "%s"')
+                                ->end()
+                            ->end()
                         ->end()
+                
                     ->end()
                 ->end()
             ->end();
