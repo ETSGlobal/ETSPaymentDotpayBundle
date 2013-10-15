@@ -88,11 +88,6 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @var integer
      */
     protected $type;
-    
-    /**
-     * @var integer
-     */
-    protected $type;
 
     /**
      * @var boolean
