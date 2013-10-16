@@ -197,7 +197,7 @@ class DotpayDirectPlugin extends AbstractPlugin
     protected function generateChk(array $datas, $pin)
     {
         $key = $datas['id'].
-               $datas['amount'].
+                number_format($datas['amount'], 2, '.', '').
                $datas['currency'].
                rawurlencode($datas['description']).
                (isset($datas['control']) ? $datas['control'] : '').
