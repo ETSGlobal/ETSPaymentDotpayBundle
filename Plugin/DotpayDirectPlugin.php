@@ -196,19 +196,18 @@ class DotpayDirectPlugin extends AbstractPlugin
      */
     protected function generateChk(array $datas, $pin)
     {
-        $fields = array('id', 'amount', 'currency', 'description', 'control', 'PIN');
-        if (!empty($datas['channel'])) {
-            $fields = array_merge($fields, array('channel', 'chlock'));
+        $key = $datas['id'].
+               $datas['amount'].
+               $datas['currency'].
+               rawurlencode($datas['description']).
+               (isset($datas['control']) ? $datas['control'] : '').
+               $pin;
+        
+        if (isset($datas['channel'])) {
+            $key .= $datas['channel'].
+                    (isset($datas['chlock']) ? $datas['chlock'] : '');
         }
-        $data = '';
-        foreach ($fields as $f) {
-            if ($f === 'PIN') {
-                $data .= $pin;
-            } else {
-                $data .= isset($datas[ $f ]) ? $datas[ $f ] : '';
-            }
-        }
-        return md5($data);
+        return md5($key);
     }
 
     /**
