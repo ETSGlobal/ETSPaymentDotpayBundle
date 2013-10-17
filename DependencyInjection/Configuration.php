@@ -64,8 +64,8 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                             ->scalarNode('return_url')->defaultNull()->end()
-                            ->scalarNode('chk')
-                                ->defaultValue(false)
+                            ->booleanNode('chk')
+                                ->defaultFalse()
                             ->end()
                         ->end()
                 

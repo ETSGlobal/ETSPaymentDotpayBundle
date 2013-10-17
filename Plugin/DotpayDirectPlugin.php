@@ -102,6 +102,7 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @param string  $url         The urlc
      * @param integer $type        The type
      * @param string  $returnUrl   The return url
+     * @param boolean $returnUrl   Using DotPay CHK parameter, by default false
      */
     public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl, $chk = false)
     {
@@ -111,7 +112,7 @@ class DotpayDirectPlugin extends AbstractPlugin
         $this->returnUrl = $returnUrl;
         $this->url = $url;
         $this->type = $type;
-        $this->chk = $chk ? true : false;
+        $this->chk = $chk;
     }
 
     /**
@@ -196,17 +197,25 @@ class DotpayDirectPlugin extends AbstractPlugin
      */
     protected function generateChk(array $datas, $pin)
     {
-        $key = $datas['id'].
-                number_format($datas['amount'], 2, '.', '').
-               $datas['currency'].
-               rawurlencode($datas['description']).
-               (isset($datas['control']) ? $datas['control'] : '').
-               $pin;
+        $key =  $datas['id'];
+        $key .= number_format($datas['amount'], 2, '.', '');
+        $key .= $datas['currency'];
+        $key .= rawurlencode($datas['description']);
+        
+        if (isset($datas['control'])) {
+            $key .= $datas['control'];
+        }
+        
+        $key .= $pin;
         
         if (isset($datas['channel'])) {
-            $key .= $datas['channel'].
-                    (isset($datas['chlock']) ? $datas['chlock'] : '');
+            $key .= $datas['channel'];
+            
+            if (isset($datas['chlock'])) {
+                $key .= $datas['chlock'];
+            }
         }
+        
         return md5($key);
     }
 
