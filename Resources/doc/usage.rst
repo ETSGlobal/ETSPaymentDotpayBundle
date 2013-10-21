@@ -21,7 +21,7 @@ You can configure some custom fields :
                 'default_method' => 'dotpay_direct', // Optional
                 'predefined_data' => array(
                     'dotpay_direct' => array(
-                        'street'    => 'Customer's address street line',    // Optional
+                        'street'    => 'Customer\'s address street line',    // Optional
                         'phone'     => 'Customer phone number',             // Optional
                         'postcode'  => 'Customer address postal code',      // Optional
                         'lastname'  => 'Customer lastname',                 // Optional
