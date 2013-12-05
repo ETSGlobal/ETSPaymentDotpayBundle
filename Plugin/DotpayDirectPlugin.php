@@ -175,6 +175,12 @@ class DotpayDirectPlugin extends AbstractPlugin
             'street', 'phone', 'postcode', 'lastname',
             'firstname', 'email', 'country', 'city', 'grupykanalow',
         );
+        if ($this->recipientChk) {
+            $additionalDatas = array_merge($additionalDatas, array(
+                'recipientAccountNumber', 'recipientCompany', 'recipientFirstName', 'recipientLastName', 'recipientAddressStreet',
+                'recipientAddressBuilding', 'recipientAddressApartment', 'recipientAddressPostcode', 'recipientAddressCity'
+            ));
+        }
 
         foreach ($additionalDatas as $value) {
             if ($extendedData->has($value)) {
