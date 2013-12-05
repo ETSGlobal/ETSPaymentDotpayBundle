@@ -27,6 +27,7 @@
             <argument>%payment.dotpay.direct.type%</argument>
             <argument>%payment.dotpay.direct.return_url%</argument>
             <argument>%payment.dotpay.direct.chk%</argument>
+            <argument>%payment.dotpay.direct.recipientChk%</argument>
             <tag name="payment.plugin" />
         </service>
 

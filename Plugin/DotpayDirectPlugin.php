@@ -93,7 +93,12 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @var boolean
      */
     protected $chk;
-    
+
+    /**
+     * @var boolean
+     */
+    protected $recipientChk;
+
 
     /**
      * @param Router  $router      The router
@@ -104,7 +109,7 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @param string  $returnUrl   The return url
      * @param boolean $returnUrl   Using DotPay CHK parameter, by default false
      */
-    public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl, $chk = false)
+    public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl, $chk = false, $recipientChk = false)
     {
         $this->router = $router;
         $this->token = $token;
@@ -113,6 +118,7 @@ class DotpayDirectPlugin extends AbstractPlugin
         $this->url = $url;
         $this->type = $type;
         $this->chk = $chk;
+        $this->recipientChk = $recipientChk;
     }
 
     /**
@@ -184,6 +190,10 @@ class DotpayDirectPlugin extends AbstractPlugin
             $datas['chk'] = $this->generateChk($datas, $this->token->getPin());
         }
 
+        if ($this->recipientChk) {
+            $datas['recipientChk'] = $this->generateRecipientChk($datas, $this->token->getPin());
+        }
+
         $actionRequest->setAction(new VisitUrl($this->url . '?' . http_build_query($datas)));
 
         return $actionRequest;
@@ -217,6 +227,44 @@ class DotpayDirectPlugin extends AbstractPlugin
         }
         
         return md5($key);
+    }
+
+    /**
+     * This method generates recipientChk parameter user to sign request with recipient data to dotpay
+     *
+     * @param array $datas
+     * @param string $pin
+     */
+    protected function generateRecipientChk(array $datas, $pin)
+    {
+        $key =  $datas['id'];
+        $key .= number_format($datas['amount'], 2, '.', '');
+        $key .= $datas['currency'];
+
+        if (isset($datas['control'])) {
+            $key .= $datas['control'];
+        }
+
+        $recipientFields = array(
+            'recipientAccountNumber',
+            'recipientCompany',
+            'recipientFirstName',
+            'recipientLastName',
+            'recipientAddressStreet',
+            'recipientAddressBuilding',
+            'recipientAddressApartment',
+            'recipientAddressPostcode',
+            'recipientAddressCity'
+        );
+        foreach ($recipientFields as $f) {
+            if (isset($datas[$f])) {
+                $key .= $datas[$f];
+            }
+        }
+
+        $key .= $pin;
+
+        return hash( 'sha256', $key);
     }
 
     /**

@@ -67,6 +67,9 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('chk')
                                 ->defaultFalse()
                             ->end()
+                            ->booleanNode('recipientChk')
+                                ->defaultFalse()
+                            ->end()
                         ->end()
                 
                     ->end()
