@@ -70,6 +70,9 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('recipientChk')
                                 ->defaultFalse()
                             ->end()
+                            ->booleanNode('onlineTransfer')
+                                ->defaultFalse()
+                            ->end()
                         ->end()
                 
                     ->end()

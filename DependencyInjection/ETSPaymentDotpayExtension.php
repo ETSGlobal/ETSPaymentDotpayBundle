@@ -51,5 +51,6 @@ class ETSPaymentDotpayExtension extends Extension
         $container->setParameter('payment.dotpay.direct.return_url', $config['direct']['return_url']);
         $container->setParameter('payment.dotpay.direct.chk', $config['direct']['chk']);
         $container->setParameter('payment.dotpay.direct.recipientChk', $config['direct']['recipientChk']);
+        $container->setParameter('payment.dotpay.direct.onlineTransfer', $config['direct']['onlineTransfer']);
     }
 }

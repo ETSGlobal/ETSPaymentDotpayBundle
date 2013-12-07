@@ -99,6 +99,11 @@ class DotpayDirectPlugin extends AbstractPlugin
      */
     protected $recipientChk;
 
+    /**
+     * @var boolean
+     */
+    protected $onlineTransfer;
+
 
     /**
      * @param Router  $router      The router
@@ -109,7 +114,7 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @param string  $returnUrl   The return url
      * @param boolean $returnUrl   Using DotPay CHK parameter, by default false
      */
-    public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl, $chk = false, $recipientChk = false)
+    public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl, $chk = false, $recipientChk = false, $onlineTransfer = false)
     {
         $this->router = $router;
         $this->token = $token;
@@ -119,6 +124,7 @@ class DotpayDirectPlugin extends AbstractPlugin
         $this->type = $type;
         $this->chk = $chk;
         $this->recipientChk = $recipientChk;
+        $this->onlineTransfer = $onlineTransfer;
     }
 
     /**
@@ -165,6 +171,7 @@ class DotpayDirectPlugin extends AbstractPlugin
             'url'               => $this->getReturnUrl($extendedData),
             'URLC'              => $urlc,
             'type'              => $this->type,
+            'onlinetransfer'    => $this->onlineTransfer ? 1 : 0,
 
             'amount'      => $transaction->getRequestedAmount(),
             'currency'    => $instruction->getCurrency(),
