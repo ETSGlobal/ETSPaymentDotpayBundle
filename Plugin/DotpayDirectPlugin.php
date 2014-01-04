@@ -180,7 +180,7 @@ class DotpayDirectPlugin extends AbstractPlugin
 
         $additionalDatas = array(
             'street', 'phone', 'postcode', 'lastname', 'firstname',
-            'email', 'country', 'city', 'grupykanalow', 'street_n1', 'street_n2'
+            'email', 'country', 'city', 'grupykanalow', 'street_n1', 'street_n2', 'description'
         );
         if ($this->recipientChk) {
             $additionalDatas = array_merge($additionalDatas, array(
