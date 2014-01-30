@@ -92,7 +92,7 @@ class CallbackController extends Controller
                 }
 
             } else {
-                $logger->err('[Dotpay - URLC] unable to create new transaction, deposited amount isn`t less then total amount');
+                $logger->err('[Dotpay - URLC] unable to create new transaction, all of amount has been deposited');
 
                 return new Response('FAIL', 500);
             }
