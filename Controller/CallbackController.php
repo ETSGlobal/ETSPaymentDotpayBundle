@@ -52,6 +52,9 @@ class CallbackController extends Controller
         $logger = $this->get('logger');
         $ppc = $this->get('payment.plugin_controller');
 
+        $t_id = $request->request->get('t_id');
+        $amount = (float) $request->get('amount');
+
         // Check the PIN
         $control = md5(sprintf(
             "%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s",
@@ -69,30 +72,29 @@ class CallbackController extends Controller
         ));
 
         if ($control !== $request->request->get('md5')) {
-            $logger->err('[Dotpay - URLC] pin verification failed');
+            $logger->err('[Dotpay - URLC - ' . $t_id .'] pin verification failed');
 
             return new Response('FAIL', 500);
         }
 
-        $amount = (float) $request->get('amount');
-
+        // Handling payment:
         if (null === $transaction = $instruction->getPendingTransaction()) {
 
             if ($instruction->getAmount() > $instruction->getDepositedAmount()) {
 
-                $logger->err('[Dotpay - URLC] no pending transaction found for the payment instruction, creating new one');
+                $logger->err('[Dotpay - URLC - ' . $t_id .'] no pending transaction found for the payment instruction, creating new one');
                 $payment = $ppc->createPayment($instruction->getId(), $amount);
                 $ppc->approveAndDeposit($payment->getId(), $amount);
                 $transaction = $payment->getPendingTransaction();
 
                 if (null === $transaction) {
-                    $logger->err('[Dotpay - URLC] error while creating new transaction');
+                    $logger->err('[Dotpay - URLC - ' . $t_id .'] error while creating new transaction');
 
                     return new Response('FAIL', 500);
                 }
 
             } else {
-                $logger->err('[Dotpay - URLC] unable to create new transaction, all of amount has been deposited');
+                $logger->err('[Dotpay - URLC - ' . $t_id .'] unable to create new transaction, all of amount has been deposited');
 
                 return new Response('FAIL', 500);
             }
@@ -105,14 +107,14 @@ class CallbackController extends Controller
         try {
             $ppc->approveAndDeposit($transaction->getPayment()->getId(), $amount);
         } catch (\Exception $e) {
-            $logger->err(sprintf('[Dotpay - URLC] %s', $e->getMessage()));
+            $logger->err(sprintf('[Dotpay - URLC - ' . $t_id .'] %s', $e->getMessage()));
 
             return new Response('FAIL', 500);
         }
 
         $this->getDoctrine()->getManager()->flush();
 
-        $logger->info(sprintf('[Dotpay - URLC] Payment instruction %s successfully updated', $instruction->getId()));
+        $logger->info(sprintf('[Dotpay - URLC - ' . $t_id .'] Payment instruction %s successfully updated', $instruction->getId()));
 
         return new Response('OK');
     }
