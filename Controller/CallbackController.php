@@ -107,14 +107,14 @@ class CallbackController extends Controller
         try {
             $ppc->approveAndDeposit($transaction->getPayment()->getId(), $amount);
         } catch (\Exception $e) {
-            $logger->err(sprintf('[Dotpay - URLC - ' . $t_id .'] %s', $e->getMessage()));
+            $logger->err(sprintf('[Dotpay - URLC - %s] %s', $t_id, $e->getMessage()));
 
             return new Response('FAIL', 500);
         }
 
         $this->getDoctrine()->getManager()->flush();
 
-        $logger->info(sprintf('[Dotpay - URLC - ' . $t_id .'] Payment instruction %s successfully updated', $instruction->getId()));
+        $logger->info(sprintf('[Dotpay - URLC - %s] Payment instruction %s successfully updated', $t_id, $instruction->getId()));
 
         return new Response('OK');
     }
