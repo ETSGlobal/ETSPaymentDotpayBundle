@@ -73,6 +73,9 @@ class Configuration implements ConfigurationInterface
                             ->booleanNode('onlineTransfer')
                                 ->defaultFalse()
                             ->end()
+                            ->integerNode('expirationTime')
+                                ->defaultValue(0)
+                            ->end()
                         ->end()
                 
                     ->end()

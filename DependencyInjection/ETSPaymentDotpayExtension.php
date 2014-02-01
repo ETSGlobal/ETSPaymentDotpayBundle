@@ -52,5 +52,6 @@ class ETSPaymentDotpayExtension extends Extension
         $container->setParameter('payment.dotpay.direct.chk', $config['direct']['chk']);
         $container->setParameter('payment.dotpay.direct.recipientChk', $config['direct']['recipientChk']);
         $container->setParameter('payment.dotpay.direct.onlineTransfer', $config['direct']['onlineTransfer']);
+        $container->setParameter('payment.dotpay.direct.expirationTime', $config['direct']['expirationTime']);
     }
 }

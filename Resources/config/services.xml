@@ -29,6 +29,7 @@
             <argument>%payment.dotpay.direct.chk%</argument>
             <argument>%payment.dotpay.direct.recipientChk%</argument>
             <argument>%payment.dotpay.direct.onlineTransfer%</argument>
+            <argument>%payment.dotpay.direct.expirationTime%</argument>
             <tag name="payment.plugin" />
         </service>
 

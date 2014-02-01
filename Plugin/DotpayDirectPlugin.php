@@ -104,6 +104,11 @@ class DotpayDirectPlugin extends AbstractPlugin
      */
     protected $onlineTransfer;
 
+    /**
+     * @var integer
+     */
+    protected $expirationTime;
+
 
     /**
      * @param Router  $router      The router
@@ -114,7 +119,7 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @param string  $returnUrl   The return url
      * @param boolean $returnUrl   Using DotPay CHK parameter, by default false
      */
-    public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl, $chk = false, $recipientChk = false, $onlineTransfer = false)
+    public function __construct(Router $router, Token $token, String $stringTools, $url, $type, $returnUrl, $chk = false, $recipientChk = false, $onlineTransfer = false, $expirationTime = 0)
     {
         $this->router = $router;
         $this->token = $token;
@@ -125,6 +130,7 @@ class DotpayDirectPlugin extends AbstractPlugin
         $this->chk = $chk;
         $this->recipientChk = $recipientChk;
         $this->onlineTransfer = $onlineTransfer;
+        $this->expirationTime = $expirationTime;
     }
 
     /**
@@ -176,6 +182,9 @@ class DotpayDirectPlugin extends AbstractPlugin
             'amount'      => $transaction->getRequestedAmount(),
             'currency'    => $instruction->getCurrency(),
             'description' => sprintf('Payment Instruction #%d', $instruction->getId()),
+
+            'expirationDate' => $this->expirationTime > 0 ? date('Y-m-d H:i:s', time() + $this->expirationTime * 60) : null,
+            'maturityDate' => null
         );
 
         $additionalDatas = array(
@@ -198,14 +207,15 @@ class DotpayDirectPlugin extends AbstractPlugin
         if ($extendedData->has('lang')) {
             $datas['lang'] = substr($extendedData->get('lang'), 0, 2);
         }
-        
-        if ($this->chk) {
-            $datas['chk'] = $this->generateChk($datas, $this->token->getPin());
-        }
 
         if ($this->recipientChk) {
             $datas['recipientChk'] = $this->generateRecipientChk($datas, $this->token->getPin());
         }
+
+        if ($this->chk) {
+            $datas['chk'] = $this->generateChk($datas, $this->token->getPin());
+        }
+
 
         $actionRequest->setAction(new VisitUrl($this->url . '?' . http_build_query($datas)));
 
@@ -238,6 +248,19 @@ class DotpayDirectPlugin extends AbstractPlugin
                 $key .= $datas['chlock'];
             }
         }
+
+        if (isset($datas['expirationDate'])) {
+            $key .= $datas['expirationDate'];
+
+            if (isset($datas['maturityDate'])) {
+                $key .= $datas['maturityDate'];
+            }
+        }
+
+        if (isset($datas['recipientChk'])) {
+            $key .= $datas['recipientChk'];
+        }
+
         
         return md5($key);
     }
