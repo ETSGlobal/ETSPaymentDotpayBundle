@@ -183,8 +183,8 @@ class DotpayDirectPlugin extends AbstractPlugin
             'currency'    => $instruction->getCurrency(),
             'description' => sprintf('Payment Instruction #%d', $instruction->getId()),
 
-            'expirationDate' => $this->expirationTime > 0 ? date('Y-m-d H:i:s', time() + $this->expirationTime * 60) : null,
-            'maturityDate' => null
+            'data_waznosci' => $this->expirationTime > 0 ? date('Y-m-d H:i:s', time() + $this->expirationTime * 60) : null,
+            'data_zapadalnosci' => null
         );
 
         $additionalDatas = array(
@@ -249,12 +249,13 @@ class DotpayDirectPlugin extends AbstractPlugin
             }
         }
 
-        if (isset($datas['expirationDate'])) {
-            $key .= $datas['expirationDate'];
+        if (isset($datas['data_waznosci'])) {
 
-            if (isset($datas['maturityDate'])) {
-                $key .= $datas['maturityDate'];
+            if (isset($datas['data_zapadalnosci'])) {
+                $key .= $datas['data_zapadalnosci'];
             }
+
+            $key .= $datas['data_waznosci'];
         }
 
         if (isset($datas['recipientChk'])) {
