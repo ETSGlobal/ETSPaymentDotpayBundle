@@ -74,7 +74,7 @@ class CallbackController extends Controller
         if ($control !== $request->request->get('md5')) {
             $logger->err('[Dotpay - URLC - ' . $t_id .'] pin verification failed');
 
-            return new Response('FAIL', 500);
+            return new Response('FAIL SIGNATURE', 500);
         }
 
         // Handling payment:
@@ -90,13 +90,13 @@ class CallbackController extends Controller
                 if (null === $transaction) {
                     $logger->err('[Dotpay - URLC - ' . $t_id .'] error while creating new transaction');
 
-                    return new Response('FAIL', 500);
+                    return new Response('FAIL CREATING NEW TRANSACTION', 500);
                 }
 
             } else {
                 $logger->err('[Dotpay - URLC - ' . $t_id .'] unable to create new transaction, all of amount has been deposited');
 
-                return new Response('FAIL', 500);
+                return new Response('FAIL, TRANSACTION IS COMPLETED', 500);
             }
         }
 
@@ -109,7 +109,7 @@ class CallbackController extends Controller
         } catch (\Exception $e) {
             $logger->err(sprintf('[Dotpay - URLC - %s] %s', $t_id, $e->getMessage()));
 
-            return new Response('FAIL', 500);
+            return new Response('FAIL APPROVE AND DEPOSIT', 500);
         }
 
         $this->getDoctrine()->getManager()->flush();
