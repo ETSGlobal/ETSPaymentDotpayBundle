@@ -174,7 +174,7 @@ class DotpayDirectPlugin extends AbstractPlugin
 
         $datas = array(
             'id'                => $this->token->getId(),
-            'url'               => $this->getReturnUrl($extendedData),
+            'URL'               => $this->getReturnUrl($extendedData),
             'URLC'              => $urlc,
             'type'              => $this->type,
             'onlinetransfer'    => $this->onlineTransfer ? 1 : 0,
