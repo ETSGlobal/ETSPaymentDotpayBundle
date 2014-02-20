@@ -10,6 +10,7 @@ use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
 use JMS\Payment\CoreBundle\Plugin\Exception\FinancialException;
 use ETS\Payment\DotpayBundle\Event\DotpayConfirmationReceivedEvent;
 use ETS\Payment\DotpayBundle\Event\Events as DotpayEvents;
+use JMS\Payment\CoreBundle\PluginController\Result;
 
 /*
  * Copyright 2012 ETSGlobal <e4-devteam@etsglobal.org>
@@ -49,6 +50,10 @@ class CallbackController extends Controller
 
         $client = $this->get('payment.dotpay.client.token');
         $logger = $this->get('logger');
+        $ppc = $this->get('payment.plugin_controller');
+
+        $t_id = $request->request->get('t_id');
+        $amount = (float) $request->get('amount');
 
         // Check the PIN
         $control = md5(sprintf(
@@ -67,35 +72,49 @@ class CallbackController extends Controller
         ));
 
         if ($control !== $request->request->get('md5')) {
-            $logger->err('[Dotpay - URLC] pin verification failed');
+            $logger->err('[Dotpay - URLC - ' . $t_id .'] pin verification failed');
 
-            return new Response('FAIL', 500);
+            return new Response('FAIL SIGNATURE', 500);
         }
 
+        // Handling payment:
         if (null === $transaction = $instruction->getPendingTransaction()) {
-            $logger->err('[Dotpay - URLC] no pending transaction found for the payment instruction');
 
-            return new Response('FAIL', 500);
+            if ($instruction->getAmount() > $instruction->getDepositedAmount()) {
+
+                $logger->err('[Dotpay - URLC - ' . $t_id .'] no pending transaction found for the payment instruction, creating new one');
+                $payment = $ppc->createPayment($instruction->getId(), $amount);
+                $ppc->approveAndDeposit($payment->getId(), $amount);
+                $transaction = $payment->getPendingTransaction();
+
+                if (null === $transaction) {
+                    $logger->err('[Dotpay - URLC - ' . $t_id .'] error while creating new transaction');
+
+                    return new Response('FAIL CREATING NEW TRANSACTION', 500);
+                }
+
+            } else {
+                $logger->err('[Dotpay - URLC - ' . $t_id .'] unable to create new transaction, all of amount has been deposited');
+
+                return new Response('FAIL, TRANSACTION IS COMPLETED', 500);
+            }
         }
-
-        $amountParts = explode(' ', $request->get('orginal_amount')); // Yes, the right parameter is 'orginal_amount'
-        $amount = (float) $amountParts[0];                            // there is a typo error in the DotPay API
 
         $transaction->getExtendedData()->set('t_status', $request->get('t_status'));
         $transaction->getExtendedData()->set('t_id', $request->get('t_id'));
         $transaction->getExtendedData()->set('amount', $amount);
 
         try {
-            $this->get('payment.plugin_controller')->approveAndDeposit($transaction->getPayment()->getId(), $amount);
+            $ppc->approveAndDeposit($transaction->getPayment()->getId(), $amount);
         } catch (\Exception $e) {
-            $logger->err(sprintf('[Dotpay - URLC] %s', $e->getMessage()));
+            $logger->err(sprintf('[Dotpay - URLC - %s] %s', $t_id, $e->getMessage()));
 
-            return new Response('FAIL', 500);
+            return new Response('FAIL APPROVE AND DEPOSIT', 500);
         }
 
-        $this->getDoctrine()->getEntityManager()->flush();
+        $this->getDoctrine()->getManager()->flush();
 
-        $logger->info(sprintf('[Dotpay - URLC] Payment instruction %s successfully updated', $instruction->getId()));
+        $logger->info(sprintf('[Dotpay - URLC - %s] Payment instruction %s successfully updated', $t_id, $instruction->getId()));
 
         return new Response('OK');
     }

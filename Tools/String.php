@@ -16,6 +16,6 @@ class String
      */
     public function normalize($text)
     {
-        return preg_replace('/\pM*/u', '', normalizer_normalize($text, \Normalizer::FORM_D));
+        return preg_replace('/\pM*/u', '', \Normalizer::normalize($text, \Normalizer::FORM_D));
     }
 }
