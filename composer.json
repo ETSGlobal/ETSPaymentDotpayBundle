@@ -25,6 +25,6 @@
         "symfony/finder": "~2.0"
     },
     "autoload": {
-        "psr-4": { "ETS\\Payment\\DotpayBundle": "" }
+        "psr-4": { "ETS\\Payment\\DotpayBundle\\": "" }
     }
 }
