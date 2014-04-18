@@ -16,6 +16,7 @@ use JMS\Payment\CoreBundle\Plugin\Exception\FinancialException;
 use JMS\Payment\CoreBundle\Plugin\PluginInterface;
 use JMS\Payment\CoreBundle\Plugin\Exception\BlockedException;
 use JMS\Payment\CoreBundle\Entity\ExtendedData;
+use JMS\Payment\CoreBundle\Plugin\Exception\FunctionNotSupportedException;
 
 use ETS\Payment\DotpayBundle\Client\Token;
 use ETS\Payment\DotpayBundle\Tools\String;

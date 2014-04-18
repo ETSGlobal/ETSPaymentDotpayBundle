@@ -7,7 +7,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
 use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
-use JMS\Payment\CoreBundle\Plugin\Exception\FinancialException;
 use ETS\Payment\DotpayBundle\Event\DotpayConfirmationReceivedEvent;
 use ETS\Payment\DotpayBundle\Event\Events as DotpayEvents;
 
