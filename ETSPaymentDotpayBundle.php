@@ -5,7 +5,7 @@ namespace ETS\Payment\DotpayBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /*
- * Copyright 2012 ETSGlobal <e4-devteam@etsglobal.org>
+ * Copyright 2012 ETSGlobal <ecs@etsglobal.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 /**
  * ETS Payment Dotpay Bundle
  *
- * @author ETSGlobal <e4-devteam@etsglobal.org>
+ * @author ETSGlobal <ecs@etsglobal.org>
  */
 class ETSPaymentDotpayBundle extends Bundle
 {

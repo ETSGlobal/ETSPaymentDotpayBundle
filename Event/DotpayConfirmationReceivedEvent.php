@@ -7,7 +7,7 @@ use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /*
- * Copyright 2012 ETSGlobal <e4-devteam@etsglobal.org>
+ * Copyright 2012 ETSGlobal <ecs@etsglobal.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
  * DotpayConfirmationReceivedEvent
  * This event is dispatched when the urlc action is called by dotpay.
  *
- * @author ETSGlobal <e4-devteam@etsglobal.org>
+ * @author ETSGlobal <ecs@etsglobal.org>
  */
 class DotpayConfirmationReceivedEvent extends Event
 {

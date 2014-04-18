@@ -3,7 +3,7 @@
 namespace ETS\Payment\DotpayBundle\Event;
 
 /*
- * Copyright 2012 ETSGlobal <e4-devteam@etsglobal.org>
+ * Copyright 2012 ETSGlobal <ecs@etsglobal.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ namespace ETS\Payment\DotpayBundle\Event;
 /**
  * Events triggered by the Dotpay bundle
  *
- * @author ETSGlobal <e4-devteam@etsglobal.org>
+ * @author ETSGlobal <ecs@etsglobal.org>
  */
 abstract class Events
 {

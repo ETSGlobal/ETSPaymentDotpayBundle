@@ -6,7 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 
 /*
- * Copyright 2012 ETSGlobal <e4-devteam@etsglobal.org>
+ * Copyright 2012 ETSGlobal <ecs@etsglobal.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 /**
  * Type for Dotpay direct payment method.
  *
- * @author ETSGlobal <e4-devteam@etsglobal.org>
+ * @author ETSGlobal <ecs@etsglobal.org>
  */
 class DirectType extends AbstractType
 {

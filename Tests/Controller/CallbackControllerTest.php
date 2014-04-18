@@ -11,7 +11,7 @@ use JMS\Payment\CoreBundle\Plugin\Exception\Action\VisitUrl;
 use JMS\Payment\CoreBundle\Model\PaymentInstructionInterface;
 
 /*
- * Copyright 2012 ETSGlobal <e4-devteam@etsglobal.org>
+ * Copyright 2012 ETSGlobal <ecs@etsglobal.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ use JMS\Payment\CoreBundle\Model\PaymentInstructionInterface;
 /**
  * Callback controller test
  *
- * @author ETSGlobal <e4-devteam@etsglobal.org>
+ * @author ETSGlobal <ecs@etsglobal.org>
  */
 class CallbackControllerTest extends ContainerAwareWebTestCase
 {

@@ -5,7 +5,7 @@ namespace ETS\Payment\DotpayBundle\Client;
 use ETS\Payment\DotpayBundle\Client\TokenInterface;
 
 /*
- * Copyright 2012 ETSGlobal <e4-devteam@etsglobal.org>
+ * Copyright 2012 ETSGlobal <ecs@etsglobal.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ use ETS\Payment\DotpayBundle\Client\TokenInterface;
 /**
  * Token
  *
- * @author ETSGlobal <e4-devteam@etsglobal.org>
+ * @author ETSGlobal <ecs@etsglobal.org>
  */
 class Token implements TokenInterface
 {
