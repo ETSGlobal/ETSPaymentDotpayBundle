@@ -52,7 +52,7 @@ class CallbackControllerTest extends ContainerAwareWebTestCase
             ),
         ));
 
-        $form->bind(array(
+        $form->submit(array(
             'method' => 'dotpay_direct',
         ));
 
