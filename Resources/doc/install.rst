@@ -26,3 +26,13 @@ Configuration
             url: the dotpay url (Optional, default : https://ssl.dotpay.pl/ )
             type: defines a method of redirection to the seller’s web page (Optional, default: 2)
             return_url: The url of the return button (Optional)
+            
+            
+            
+Routing
+-------------
+::
+
+    //YAML routing.yml
+    ets_payment_dotpay_bundle:
+        resource: "@ETSPaymentDotpayBundle/Resources/config/routing.yml"
