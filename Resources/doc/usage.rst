@@ -47,6 +47,6 @@ interface to a persistence backend like the Doctrine ORM. It also performs addit
 integrity checks to validate transactions. If you don't need these checks, and only want
 an easy way to communicate with the Dotpay API, then you can use the plugin directly::
 
-    $plugin = $container->get('payment.form.dotpay_direct_type');
+    $plugin = $container->get('payment.plugin.dotpay_direct');
 
 .. _JMSPaymentCoreBundle: https://github.com/schmittjoh/JMSPaymentCoreBundle/blob/master/Resources/doc/index.rst
