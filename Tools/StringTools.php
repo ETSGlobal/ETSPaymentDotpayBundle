@@ -5,7 +5,7 @@ namespace ETS\Payment\DotpayBundle\Tools;
 /**
  * String tools
  */
-class String
+class StringTools
 {
     /**
      * Remove all unwanted caracters
