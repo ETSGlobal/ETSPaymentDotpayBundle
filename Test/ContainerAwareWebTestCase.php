@@ -47,7 +47,9 @@ class ContainerAwareWebTestCase extends WebTestCase
      */
     public function tearDown()
     {
-        static::$kernel->shutdown();
+        if (null !== static::$kernel) {
+            static::$kernel->shutdown();
+        }
 
         parent::tearDown();
     }
