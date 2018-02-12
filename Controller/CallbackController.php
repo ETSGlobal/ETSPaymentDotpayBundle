@@ -49,30 +49,48 @@ class CallbackController extends Controller
         $client = $this->get('payment.dotpay.client.token');
         $logger = $this->get('logger');
 
+        $transactionId = $request->request->get('t_id');
+        $transactionStatus = $request->request->get('t_status');
+
         // Check the PIN
         $control = md5(sprintf(
             "%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s",
             $client->getPin(),
             $client->getId(),
             $request->request->get('control'),
-            $request->request->get('t_id'),
+            $transactionId,
             $request->request->get('amount'),
             $request->request->get('email'),
             $request->request->get('service'),
             $request->request->get('code'),
             $request->request->get('username'),
             $request->request->get('password'),
-            $request->request->get('t_status')
+            $transactionStatus
         ));
 
         if ($control !== $request->request->get('md5')) {
-            $logger->err('[Dotpay - URLC] pin verification failed');
+            $logger->error(
+                '[Dotpay - URLC] pin verification failed',
+                array(
+                    'paymentInstructionId' => $instruction->getId(),
+                    'dotpayTransactionId' => $transactionId,
+                    'dotpayTransactionStatus' => $transactionStatus,
+                )
+            );
 
             return new Response('FAIL', 500);
         }
 
         if (null === $transaction = $instruction->getPendingTransaction()) {
-            $logger->err('[Dotpay - URLC] no pending transaction found for the payment instruction');
+            // this could happen if the transaction is already validated via http redirection
+            $logger->info(
+                '[Dotpay - URLC] no pending transaction found for the payment instruction',
+                array(
+                    'paymentInstructionId' => $instruction->getId(),
+                    'dotpayTransactionId' => $transactionId,
+                    'dotpayTransactionStatus' => $transactionStatus,
+                )
+            );
 
             return new Response('FAIL', 500);
         }
@@ -80,21 +98,37 @@ class CallbackController extends Controller
         $amountParts = explode(' ', $request->get('orginal_amount')); // Yes, the right parameter is 'orginal_amount'
         $amount = (float) $amountParts[0];                            // there is a typo error in the DotPay API
 
-        $transaction->getExtendedData()->set('t_status', $request->get('t_status'));
-        $transaction->getExtendedData()->set('t_id', $request->get('t_id'));
+        $transaction->getExtendedData()->set('t_status', $transactionStatus);
+        $transaction->getExtendedData()->set('t_id', $transactionId);
         $transaction->getExtendedData()->set('amount', $amount);
 
         try {
             $this->get('payment.plugin_controller')->approveAndDeposit($transaction->getPayment()->getId(), $amount);
-        } catch (\Exception $e) {
-            $logger->err(sprintf('[Dotpay - URLC] %s', $e->getMessage()));
+        } catch (\Exception $exception) {
+            $logger->error(
+                '[Dotpay - URLC] error {exceptionClass} {exceptionMessage}',
+                array(
+                    'paymentInstructionId' => $instruction->getId(),
+                    'dotpayTransactionId' => $transactionId,
+                    'dotpayTransactionStatus' => $transactionStatus,
+                    'exceptionClass' => get_class($exception),
+                    'exceptionMessage' => $e->getMessage()
+                )
+            );
 
             return new Response('FAIL', 500);
         }
 
         $this->getDoctrine()->getManager()->flush();
 
-        $logger->info(sprintf('[Dotpay - URLC] Payment instruction %s successfully updated', $instruction->getId()));
+        $logger->info(
+            '[Dotpay - URLC] Payment instruction {paymentInstructionId} successfully updated',
+            array(
+                'paymentInstructionId' => $instruction->getId(),
+                'dotpayTransactionId' => $transactionId,
+                'dotpayTransactionStatus' => $transactionStatus
+            )
+        );
 
         return new Response('OK');
     }
