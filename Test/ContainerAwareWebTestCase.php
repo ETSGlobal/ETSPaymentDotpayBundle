@@ -4,6 +4,11 @@ namespace ETS\Payment\DotpayBundle\Test;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
+use Doctrine\Common\Persistence\PersistentObject;
+use Doctrine\ORM\Tools\SchemaTool;
+
 /*
  * Copyright 2012 ETSGlobal <ecs@etsglobal.org>
  *
@@ -32,6 +37,9 @@ class ContainerAwareWebTestCase extends WebTestCase
      */
     protected static $client;
 
+    protected $em;
+    protected $tool;
+
     /**
      * @return null
      */
@@ -40,6 +48,8 @@ class ContainerAwareWebTestCase extends WebTestCase
         self::$client = self::createClient();
 
         parent::setUp();
+
+        $this->setUpDoctrine();
     }
 
     /**
@@ -70,5 +80,29 @@ class ContainerAwareWebTestCase extends WebTestCase
     public function getContainer()
     {
         return static::$kernel->getContainer();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected static function getKernelClass()
+    {
+        require_once __DIR__.'/AppKernel.php';
+
+        return 'ETS\Payment\DotpayBundle\Test\AppKernel';
+    }
+
+    protected function setUpDoctrine()
+    {
+        $this->em = $this->get('doctrine.orm.default_entity_manager');
+        PersistentObject::setObjectManager($this->em);
+
+        $this->tool = new SchemaTool($this->em);
+        $this->tool->updateSchema($this->em->getMetadataFactory()->getAllMetadata(), true);
+    }
+
+    protected function dropDoctrine()
+    {
+        $this->tool->dropSchema($this->em->getMetadataFactory()->getAllMetadata());
     }
 }

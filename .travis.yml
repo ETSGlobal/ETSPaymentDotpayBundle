@@ -18,4 +18,4 @@ env:
 
 before_script:
   - composer require symfony/symfony:${SYMFONY_VERSION} --no-update
-  - composer install --dev
+  - composer install
