@@ -50,6 +50,7 @@ class CallbackControllerTest extends ContainerAwareWebTestCase
                     'return_url' => 'http://test.com',
                 ),
             ),
+            'csrf_protection' => false,
         ));
 
         $form->submit(array(

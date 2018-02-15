@@ -62,6 +62,8 @@ class ContainerAwareWebTestCase extends WebTestCase
         }
 
         parent::tearDown();
+
+        $this->dropDoctrine();
     }
 
     /**
