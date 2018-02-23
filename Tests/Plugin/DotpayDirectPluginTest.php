@@ -18,19 +18,11 @@ namespace ETS\PurchaseBundle\Tests\Plugin;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-use ETS\Payment\DotpayBundle\Client\Token;
+
 use ETS\Payment\DotpayBundle\Plugin\DotpayDirectPlugin;
-use ETS\Payment\DotpayBundle\Tools\StringNormalizer;
-use JMS\Payment\CoreBundle\Entity\ExtendedData;
-use JMS\Payment\CoreBundle\Entity\Payment;
-use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
-use JMS\Payment\CoreBundle\Model\ExtendedDataInterface;
-use JMS\Payment\CoreBundle\Plugin\Exception\ActionRequiredException;
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
-use JMS\Payment\CoreBundle\Plugin\Exception\FinancialException;
 use JMS\Payment\CoreBundle\Plugin\PluginInterface;
 use Prophecy\Argument;
-use Symfony\Component\Routing\Router;
 
 /**
  * Dotpay payment plugin
@@ -41,9 +33,9 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->router = $this->prophesize(Router::class);
-        $this->token = $this->prophesize(Token::class);
-        $this->stringNormalizer = $this->prophesize(StringNormalizer::class);
+        $this->router = $this->prophesize('Symfony\Component\Routing\Router');
+        $this->token = $this->prophesize('ETS\Payment\DotpayBundle\Client\Token');
+        $this->stringNormalizer = $this->prophesize('ETS\Payment\DotpayBundle\Tools\StringNormalizer');
         $url = 'urlTest';
         $type = 1;
         $returnUrl = 'returnUrlTest';
@@ -64,7 +56,7 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
         $t_id = 1;
         $amount = 10;
 
-        $extendedData = $this->prophesize(ExtendedData::class);
+        $extendedData = $this->prophesize('JMS\Payment\CoreBundle\Entity\ExtendedData');
         $extendedData->has('t_status')->shouldBeCalled()->willReturn($t_status);
         $extendedData->has('t_id')->shouldBeCalled()->willReturn($t_id);
         $extendedData->has('amount')->shouldBeCalled()->willReturn($amount);
@@ -72,7 +64,7 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
         $extendedData->get('t_id')->shouldBeCalled()->willReturn($t_id);
         $extendedData->get('amount')->shouldBeCalled()->willReturn($amount);
 
-        $financialTransaction = $this->prophesize(FinancialTransactionInterface::class);
+        $financialTransaction = $this->prophesize('JMS\Payment\CoreBundle\Model\FinancialTransactionInterface');
         $financialTransaction->getExtendedData()->shouldBeCalled()->willReturn($extendedData->reveal());
         $financialTransaction->getState()->shouldBeCalled()->willReturn(FinancialTransactionInterface::STATE_PENDING);
         $financialTransaction->setReferenceNumber($t_id)->shouldBeCalled();
@@ -88,14 +80,14 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
      */
     public function testExceptionNotNew()
     {
-        $extendedData = $this->prophesize(ExtendedDataInterface::class);
-        $paymentInstruction = $this->prophesize(PaymentInstruction::class);
-        $payment = $this->prophesize(Payment::class);
+        $extendedData = $this->prophesize('JMS\Payment\CoreBundle\Entity\ExtendedData');
+        $paymentInstruction = $this->prophesize('JMS\Payment\CoreBundle\Entity\PaymentInstruction');
+        $payment = $this->prophesize('JMS\Payment\CoreBundle\Entity\Payment');
         $payment->getPaymentInstruction()->shouldbeCalled()->willReturn($paymentInstruction->reveal());
         $paymentInstruction->getId()->shouldBeCalled()->willReturn(15);
         $paymentInstruction->getCurrency()->shouldBeCalled();
 
-        $financialTransaction = $this->prophesize(FinancialTransactionInterface::class);
+        $financialTransaction = $this->prophesize('JMS\Payment\CoreBundle\Model\FinancialTransactionInterface');
         $financialTransaction->getState()->shouldBeCalled()->willReturn(FinancialTransactionInterface::STATE_NEW);
         $financialTransaction->getPayment()->shouldBeCalled()->willReturn($payment->reveal());
         $financialTransaction->getExtendedData()->shouldBeCalled()->willReturn($extendedData->reveal());
@@ -110,7 +102,7 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
         $t_id = 1;
         $amount = 10;
 
-        $extendedData = $this->prophesize(ExtendedData::class);
+        $extendedData = $this->prophesize('JMS\Payment\CoreBundle\Entity\ExtendedData');
         $extendedData->has('t_status')->shouldBeCalled()->willReturn($t_status);
         $extendedData->has('t_id')->shouldBeCalled()->willReturn($t_id);
         $extendedData->has('amount')->shouldBeCalled()->willReturn($amount);
@@ -118,7 +110,7 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
         $extendedData->get('t_id')->shouldBeCalled()->willReturn($t_id);
         $extendedData->get('amount')->shouldBeCalled()->willReturn($amount);
 
-        $financialTransaction = $this->prophesize(FinancialTransactionInterface::class);
+        $financialTransaction = $this->prophesize('JMS\Payment\CoreBundle\Model\FinancialTransactionInterface');
         $financialTransaction->getExtendedData()->shouldBeCalled()->willReturn($extendedData->reveal());
         $financialTransaction->setReferenceNumber($t_id)->shouldBeCalled();
         $financialTransaction->setProcessedAmount($amount)->shouldBeCalled();
@@ -134,9 +126,9 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
      */
     public function testApproveExceptionBadData()
     {
-        $extendedData = $this->prophesize(ExtendedData::class);
+        $extendedData = $this->prophesize('JMS\Payment\CoreBundle\Entity\ExtendedData');
 
-        $financialTransaction = $this->prophesize(FinancialTransactionInterface::class);
+        $financialTransaction = $this->prophesize('JMS\Payment\CoreBundle\Model\FinancialTransactionInterface');
         $financialTransaction->getExtendedData()->shouldBeCalled()->willReturn($extendedData->reveal());
         $financialTransaction->setReferenceNumber(Argument::any())->shouldNotBeCalled();
         $financialTransaction->setProcessedAmount(Argument::any())->shouldNotBeCalled();
@@ -157,13 +149,13 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
         $t_id = 1;
         $amount = 10;
 
-        $extendedData = $this->prophesize(ExtendedData::class);
+        $extendedData = $this->prophesize('JMS\Payment\CoreBundle\Entity\ExtendedData');
         $extendedData->has('t_status')->shouldBeCalled()->willReturn($t_status);
         $extendedData->has('t_id')->shouldBeCalled()->willReturn($t_id);
         $extendedData->has('amount')->shouldBeCalled()->willReturn($amount);
         $extendedData->get('t_status')->shouldBeCalled()->willReturn($t_status);
 
-        $financialTransaction = $this->prophesize(FinancialTransactionInterface::class);
+        $financialTransaction = $this->prophesize('JMS\Payment\CoreBundle\Model\FinancialTransactionInterface');
         $financialTransaction->getExtendedData()->shouldBeCalled()->willReturn($extendedData->reveal());
         $financialTransaction->setReferenceNumber(Argument::any())->shouldNotBeCalled();
         $financialTransaction->setProcessedAmount(Argument::any())->shouldNotBeCalled();
@@ -179,7 +171,7 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
         $t_id = 1;
         $amount = 10;
 
-        $extendedData = $this->prophesize(ExtendedData::class);
+        $extendedData = $this->prophesize('JMS\Payment\CoreBundle\Entity\ExtendedData');
         $extendedData->has('t_status')->shouldBeCalled()->willReturn($t_status);
         $extendedData->has('t_id')->shouldBeCalled()->willReturn($t_id);
         $extendedData->has('amount')->shouldBeCalled()->willReturn($amount);
@@ -187,7 +179,7 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
         $extendedData->get('t_id')->shouldBeCalled()->willReturn($t_id);
         $extendedData->get('amount')->shouldBeCalled()->willReturn($amount);
 
-        $financialTransaction = $this->prophesize(FinancialTransactionInterface::class);
+        $financialTransaction = $this->prophesize('JMS\Payment\CoreBundle\Model\FinancialTransactionInterface');
         $financialTransaction->getExtendedData()->shouldBeCalled()->willReturn($extendedData->reveal());
         $financialTransaction->setReferenceNumber($t_id)->shouldBeCalled();
         $financialTransaction->setProcessedAmount($amount)->shouldBeCalled();
@@ -208,13 +200,13 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
         $t_id = 1;
         $amount = 10;
 
-        $extendedData = $this->prophesize(ExtendedData::class);
+        $extendedData = $this->prophesize('JMS\Payment\CoreBundle\Entity\ExtendedData');
         $extendedData->has('t_status')->shouldBeCalled()->willReturn($t_status);
         $extendedData->has('t_id')->shouldBeCalled()->willReturn($t_id);
         $extendedData->has('amount')->shouldBeCalled()->willReturn($amount);
         $extendedData->get('t_status')->shouldBeCalled()->willReturn($t_status);
 
-        $financialTransaction = $this->prophesize(FinancialTransactionInterface::class);
+        $financialTransaction = $this->prophesize('JMS\Payment\CoreBundle\Model\FinancialTransactionInterface');
         $financialTransaction->getExtendedData()->shouldBeCalled()->willReturn($extendedData->reveal());
         $financialTransaction->setReferenceNumber(Argument::any())->shouldNotBeCalled();
         $financialTransaction->setProcessedAmount(Argument::any())->shouldNotBeCalled();
@@ -234,13 +226,13 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
         $t_id = 1;
         $amount = 10;
 
-        $extendedData = $this->prophesize(ExtendedData::class);
+        $extendedData = $this->prophesize('JMS\Payment\CoreBundle\Entity\ExtendedData');
         $extendedData->has('t_status')->shouldBeCalled()->willReturn($t_status);
         $extendedData->has('t_id')->shouldBeCalled()->willReturn($t_id);
         $extendedData->has('amount')->shouldBeCalled()->willReturn($amount);
         $extendedData->get('t_status')->shouldBeCalled()->willReturn($t_status);
 
-        $financialTransaction = $this->prophesize(FinancialTransactionInterface::class);
+        $financialTransaction = $this->prophesize('JMS\Payment\CoreBundle\Model\FinancialTransactionInterface');
         $financialTransaction->getExtendedData()->shouldBeCalled()->willReturn($extendedData->reveal());
         $financialTransaction->setReferenceNumber(Argument::any())->shouldNotBeCalled();
         $financialTransaction->setProcessedAmount(Argument::any())->shouldNotBeCalled();
@@ -260,13 +252,13 @@ class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
         $t_id = 1;
         $amount = 10;
 
-        $extendedData = $this->prophesize(ExtendedData::class);
+        $extendedData = $this->prophesize('JMS\Payment\CoreBundle\Entity\ExtendedData');
         $extendedData->has('t_status')->shouldBeCalled()->willReturn($t_status);
         $extendedData->has('t_id')->shouldBeCalled()->willReturn($t_id);
         $extendedData->has('amount')->shouldBeCalled()->willReturn($amount);
         $extendedData->get('t_status')->shouldBeCalled()->willReturn($t_status);
 
-        $financialTransaction = $this->prophesize(FinancialTransactionInterface::class);
+        $financialTransaction = $this->prophesize('JMS\Payment\CoreBundle\Model\FinancialTransactionInterface');
         $financialTransaction->getExtendedData()->shouldBeCalled()->willReturn($extendedData->reveal());
         $financialTransaction->setReferenceNumber(Argument::any())->shouldNotBeCalled();
         $financialTransaction->setProcessedAmount(Argument::any())->shouldNotBeCalled();
