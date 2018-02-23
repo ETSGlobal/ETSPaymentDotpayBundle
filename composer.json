@@ -7,22 +7,18 @@
     "license": "Apache-2.0",
     "authors": [
         {
-            "name": "Clément Gautier",
-            "email": "clement.gautier@sensiolabs.com"
-        },
-        {
             "name": "ETS Global Dev Team",
             "email": "ecs@etsglobal.org"
         }
     ],
     "require": {
-        "php": ">=5.3.2",
-        "symfony/framework-bundle": "~2.2",
+        "php": ">=5.4",
+        "symfony/symfony": "~2.3",
+        "symfony/framework-bundle": "~2.3",
         "jms/payment-core-bundle": "~1.0"
     },
     "require-dev": {
-        "symfony/browser-kit": "~2.2",
-        "symfony/finder": "~2.2"
+        "phpunit/phpunit": "4.8.*"
     },
     "autoload": {
         "psr-4": { "ETS\\Payment\\DotpayBundle\\": "" }

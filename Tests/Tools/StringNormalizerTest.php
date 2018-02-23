@@ -2,7 +2,7 @@
 
 namespace ETS\PurchaseBundle\Tests\Tools;
 
-use ETS\Payment\DotpayBundle\Tools\String;
+use ETS\Payment\DotpayBundle\Tools\StringNormalizer;
 
 /*
  * Copyright 2012 ETSGlobal <ecs@etsglobal.org>
@@ -25,7 +25,7 @@ use ETS\Payment\DotpayBundle\Tools\String;
  *
  * @author ETSGlobal <ecs@etsglobal.org>
  */
-class StringTest extends \PHPUnit_Framework_TestCase
+class StringNormalizerTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @return array
@@ -47,7 +47,7 @@ class StringTest extends \PHPUnit_Framework_TestCase
      */
     public function testNormaize($input, $expected)
     {
-        $tool = new String();
+        $tool = new StringNormalizer();
 
         $this->assertEquals($expected, $tool->normalize($input));
     }

@@ -3,9 +3,9 @@
 namespace ETS\Payment\DotpayBundle\Tools;
 
 /**
- * String tools
+ * StringNormalizer tools
  */
-class String
+class StringNormalizer
 {
     /**
      * Remove all unwanted caracters
@@ -16,6 +16,6 @@ class String
      */
     public function normalize($text)
     {
-        return preg_replace('/\pM*/u', '', normalizer_normalize($text, \Normalizer::FORM_D));
+        return preg_replace('/\pM*/u', '', \Normalizer::normalize($text, \Normalizer::FORM_D));
     }
 }

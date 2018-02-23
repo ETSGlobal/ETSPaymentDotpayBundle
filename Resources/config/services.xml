@@ -8,7 +8,7 @@
         <parameter key="payment.plugin.dotpay_direct.class">ETS\Payment\DotpayBundle\Plugin\DotpayDirectPlugin</parameter>
         <parameter key="payment.form.dotpay_direct_type.class">ETS\Payment\DotpayBundle\Form\DirectType</parameter>
         <parameter key="payment.dotpay.client.token.class">ETS\Payment\DotpayBundle\Client\Token</parameter>
-        <parameter key="payment.dotpay.tools.string.class">ETS\Payment\DotpayBundle\Tools\String</parameter>
+        <parameter key="payment.dotpay.tools.string.class">ETS\Payment\DotpayBundle\Tools\StringNormalizer</parameter>
     </parameters>
 
     <services>
