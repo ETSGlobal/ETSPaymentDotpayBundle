@@ -15,12 +15,12 @@ You can configure some custom fields :
     {
         ...
 
-        $form = $this->getFormFactory()->create('jms_choose_payment_method', null, array(
+        $form = $this->getFormFactory()->create('jms_choose_payment_method', null, [
                 'amount'   => $order->getAmount(),
                 'currency' => 'EUR',
                 'default_method' => 'dotpay_direct', // Optional
-                'predefined_data' => array(
-                    'dotpay_direct' => array(
+                'predefined_data' => [
+                    'dotpay_direct' => [
                         'street'    => 'Customer\'s address street line',    // Optional
                         'phone'     => 'Customer phone number',             // Optional
                         'postcode'  => 'Customer address postal code',      // Optional
@@ -33,9 +33,9 @@ You can configure some custom fields :
                         'return_url' => $this->router->generate('payment_complete', array(
                             'orderNumber' => $order->getOrderNumber(),
                         ), true),
-                    ),
-                ),
-            ));
+                    ],
+                ],
+            ]);
 
         ...
     }

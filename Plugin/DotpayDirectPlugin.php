@@ -51,44 +51,44 @@ class DotpayDirectPlugin extends AbstractPlugin
     const STATUS_REFUND = 4;
     const STATUS_COMPLAINT = 5;
 
-    public static $statuses = array(
+    public static $statuses = [
         self::STATUS_CLOSED    => 'Closed',
         self::STATUS_NEW       => 'New',
         self::STATUS_DONE      => 'Done',
         self::STATUS_REJECTED  => 'Rejected',
         self::STATUS_REFUND    => 'Refund',
         self::STATUS_COMPLAINT => 'Complaint',
-    );
+    ];
 
-    /**
-     * @var Router
-     */
+    /** @var Router */
     protected $router;
 
-    /**
-     * @var \ETS\Payment\DotpayBundle\Client\Token
-     */
+    /** @var \ETS\Payment\DotpayBundle\Client\Token */
     protected $token;
 
-    /**
-     * @var \ETS\Payment\DotpayBundle\Tools\StringNormalizer
-     */
+    /** @var \ETS\Payment\DotpayBundle\Tools\StringNormalizer */
     protected $stringTools;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $url;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $returnUrl;
 
-    /**
-     * @var integer
-     */
+    /** @var integer */
     protected $type;
+
+    /** @var bool */
+    protected $chk;
+
+    /** @var bool */
+    protected $recipientChk;
+
+    /** @var bool */
+    protected $onlineTransfer;
+
+    /** @var bool */
+    protected $expirationTime;
 
     /**
      * @param Router            $router      The router
@@ -97,15 +97,33 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @param string            $url         The urlc
      * @param int               $type        The type
      * @param string            $returnUrl   The return url
+     * @param bool              $chk         Using DotPay CHK parameter, by default false
+     * @param bool              $recipientChk
+     * @param bool              $onlineTransfer
+     * @param int               $expirationTime
      */
-    public function __construct(Router $router, Token $token, StringNormalizer $stringTools, $url, $type, $returnUrl)
-    {
+    public function __construct(
+        Router $router,
+        Token $token,
+        StringNormalizer $stringTools,
+        $url,
+        $type,
+        $returnUrl,
+        $chk = false,
+        $recipientChk = false,
+        $onlineTransfer = false,
+        $expirationTime = 0
+    ) {
         $this->router = $router;
         $this->token = $token;
         $this->stringTools = $stringTools;
         $this->returnUrl = $returnUrl;
         $this->url = $url;
         $this->type = $type;
+        $this->chk = $chk;
+        $this->recipientChk = $recipientChk;
+        $this->onlineTransfer = $onlineTransfer;
+        $this->expirationTime = $expirationTime;
     }
 
     /**
@@ -143,25 +161,36 @@ class DotpayDirectPlugin extends AbstractPlugin
         $instruction = $transaction->getPayment()->getPaymentInstruction();
 
         $extendedData = $transaction->getExtendedData();
-        $urlc         = $this->router->generate('ets_payment_dotpay_callback_urlc', array(
-            'id' => $instruction->getId()
-        ), true);
+        $urlc         = $this->router->generate(
+            'ets_payment_dotpay_callback_urlc',
+            ['id' => $instruction->getId()],
+            true
+        );
 
-        $datas = array(
+        $datas = [
             'id'                => $this->token->getId(),
-            'url'               => $this->getReturnUrl($extendedData),
+            'URL'               => $this->getReturnUrl($extendedData),
             'URLC'              => $urlc,
             'type'              => $this->type,
-
+            'onlinetransfer'    => $this->onlineTransfer ? 1 : 0,
             'amount'      => $transaction->getRequestedAmount(),
             'currency'    => $instruction->getCurrency(),
             'description' => sprintf('Payment Instruction #%d', $instruction->getId()),
-        );
+            'data_waznosci' => $this->expirationTime > 0 ? date('Y-m-d H:i:s', time() + $this->expirationTime * 60) : null,
+            'data_zapadalnosci' => null,
+        ];
 
-        $additionalDatas = array(
-            'street', 'phone', 'postcode', 'lastname',
-            'firstname', 'email', 'country', 'city', 'grupykanalow',
-        );
+        $additionalDatas = [
+            'street', 'phone', 'postcode', 'lastname', 'firstname',
+            'email', 'country', 'city', 'grupykanalow', 'street_n1', 'street_n2', 'description',
+        ];
+
+        if ($this->recipientChk) {
+            $additionalDatas = array_merge($additionalDatas, [
+                'recipientAccountNumber', 'recipientCompany', 'recipientFirstName', 'recipientLastName', 'recipientAddressStreet',
+                'recipientAddressBuilding', 'recipientAddressApartment', 'recipientAddressPostcode', 'recipientAddressCity',
+            ]);
+        }
 
         foreach ($additionalDatas as $value) {
             if ($extendedData->has($value)) {
@@ -173,9 +202,102 @@ class DotpayDirectPlugin extends AbstractPlugin
             $datas['lang'] = substr($extendedData->get('lang'), 0, 2);
         }
 
+        if ($this->recipientChk) {
+            $datas['recipientChk'] = $this->generateRecipientChk($datas, $this->token->getPin());
+        }
+
+        if ($this->chk) {
+            $datas['chk'] = $this->generateChk($datas, $this->token->getPin());
+        }
+
         $actionRequest->setAction(new VisitUrl($this->url . '?' . http_build_query($datas)));
 
         return $actionRequest;
+    }
+
+    /**
+     * This method generates chk parameter user to sign request to dotpay
+     *
+     * @param array $datas
+     * @param string $pin
+     *
+     * @return string
+     */
+    protected function generateChk(array $datas, $pin)
+    {
+        $key =  $datas['id'];
+        $key .= number_format($datas['amount'], 2, '.', '');
+        $key .= $datas['currency'];
+        $key .= rawurlencode($datas['description']);
+
+        if (isset($datas['control'])) {
+            $key .= $datas['control'];
+        }
+
+        $key .= $pin;
+
+        if (isset($datas['channel'])) {
+            $key .= $datas['channel'];
+
+            if (isset($datas['chlock'])) {
+                $key .= $datas['chlock'];
+            }
+        }
+
+        if (isset($datas['data_waznosci'])) {
+            if (isset($datas['data_zapadalnosci'])) {
+                $key .= $datas['data_zapadalnosci'];
+            }
+
+            $key .= $datas['data_waznosci'];
+        }
+
+        if (isset($datas['recipientChk'])) {
+            $key .= $datas['recipientChk'];
+        }
+
+        return md5($key);
+    }
+
+    /**
+     * This method generates recipientChk parameter user to sign request with recipient data to dotpay
+     *
+     * @param array $datas
+     * @param string $pin
+     *
+     * @return string
+     */
+    protected function generateRecipientChk(array $datas, $pin)
+    {
+        $key =  $datas['id'];
+        $key .= number_format($datas['amount'], 2, '.', '');
+        $key .= $datas['currency'];
+
+        if (isset($datas['control'])) {
+            $key .= $datas['control'];
+        }
+
+        $recipientFields = [
+            'recipientAccountNumber',
+            'recipientCompany',
+            'recipientFirstName',
+            'recipientLastName',
+            'recipientAddressStreet',
+            'recipientAddressBuilding',
+            'recipientAddressApartment',
+            'recipientAddressPostcode',
+            'recipientAddressCity',
+        ];
+
+        foreach ($recipientFields as $f) {
+            if (isset($datas[$f])) {
+                $key .= $datas[$f];
+            }
+        }
+
+        $key .= $pin;
+
+        return hash( 'sha256', $key);
     }
 
     /**
