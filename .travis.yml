@@ -1,4 +1,9 @@
 language: php
+sudo: false
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+    - $HOME/symfony-bridge/.phpunit
 
 php:
   - '7.0'
@@ -14,6 +19,13 @@ env:
   - SYMFONY_VERSION=3.3.*
   - SYMFONY_VERSION=3.4.*
 
-before_script:
-  - composer require symfony/symfony:${SYMFONY_VERSION} --no-update
-  - composer install
+
+before_install:
+  - composer self-update
+  - composer require symfony/framework-bundle:${SYMFONY_VERSION} --no-update
+
+install:
+  - COMPOSER_MEMORY_LIMIT=-1 composer update --no-interaction --prefer-dist $COMPOSER_FLAGS
+
+script:
+  - vendor/bin/phpunit
