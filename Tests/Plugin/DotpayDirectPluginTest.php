@@ -32,6 +32,9 @@ use Prophecy\Argument;
  */
 class DotpayDirectPluginTest extends TestCase
 {
+    /** @var DotpayDirectPlugin */
+    private $dotpayDirectPlugin;
+
     public function setUp()
     {
         $this->router = $this->prophesize('Symfony\Component\Routing\Router');
@@ -267,5 +270,384 @@ class DotpayDirectPluginTest extends TestCase
         $financialTransaction->setResponseCode('Unknown')->shouldBeCalled();
 
         $this->dotpayDirectPlugin->deposit($financialTransaction->reveal(), false);
+    }
+
+    /**
+     * @dataProvider provideDataForGenerateChk
+     */
+    public function testGenerateChk(array $datas, $pin, $expected)
+    {
+        $chk = $this->invokeMethod($this->dotpayDirectPlugin, 'generateChk', [$datas, $pin]);
+
+        $this->assertEquals($expected, $chk);
+    }
+
+    public function provideDataForGenerateChk()
+    {
+        return [
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.11111,
+                    'currency' => 'EUR',
+                    'description' => 'my_fake_description',
+                    'control' => 'my_fake_control',
+                    'channel' => 'my_fake_chanel',
+                    'chlock' => 'my_fake_chlock',
+                    'data_waznosci' => 'my_fake_data_waznosci',
+                    'data_zapadalnosci' => 'my_fake_data_zapadalnosci',
+                    'recipientChk' => 'my_fake_recipientChk',
+                ],
+                'my_fake_pin',
+                md5('my_fake_id11.11EURmy_fake_descriptionmy_fake_controlmy_fake_pinmy_fake_chanelmy_fake_chlockmy_fake_data_zapadalnoscimy_fake_data_waznoscimy_fake_recipientChk'),
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.11111,
+                    'currency' => 'EUR',
+                    'description' => 'my_fake_description',
+                    'control' => 'my_fake_control',
+                    'channel' => 'my_fake_chanel',
+                    'chlock' => 'my_fake_chlock',
+                    'data_waznosci' => 'my_fake_data_waznosci',
+                    'data_zapadalnosci' => 'my_fake_data_zapadalnosci',
+                ],
+                'my_fake_pin',
+                md5('my_fake_id11.11EURmy_fake_descriptionmy_fake_controlmy_fake_pinmy_fake_chanelmy_fake_chlockmy_fake_data_zapadalnoscimy_fake_data_waznosci'),
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.11111,
+                    'currency' => 'EUR',
+                    'description' => 'my_fake_description',
+                    'control' => 'my_fake_control',
+                    'channel' => 'my_fake_chanel',
+                    'chlock' => 'my_fake_chlock',
+                    'data_zapadalnosci' => 'my_fake_data_zapadalnosci',
+                    'recipientChk' => 'my_fake_recipientChk',
+                ],
+                'my_fake_pin',
+                md5('my_fake_id11.11EURmy_fake_descriptionmy_fake_controlmy_fake_pinmy_fake_chanelmy_fake_chlockmy_fake_recipientChk'),
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.11111,
+                    'currency' => 'EUR',
+                    'description' => 'my_fake_description',
+                    'control' => 'my_fake_control',
+                    'channel' => 'my_fake_chanel',
+                    'chlock' => 'my_fake_chlock',
+                    'data_waznosci' => 'my_fake_data_waznosci',
+                    'recipientChk' => 'my_fake_recipientChk',
+                ],
+                'my_fake_pin',
+                md5('my_fake_id11.11EURmy_fake_descriptionmy_fake_controlmy_fake_pinmy_fake_chanelmy_fake_chlockmy_fake_data_waznoscimy_fake_recipientChk'),
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.11111,
+                    'currency' => 'EUR',
+                    'description' => 'my_fake_description',
+                    'control' => 'my_fake_control',
+                    'chlock' => 'my_fake_chlock',
+                    'data_waznosci' => 'my_fake_data_waznosci',
+                    'data_zapadalnosci' => 'my_fake_data_zapadalnosci',
+                    'recipientChk' => 'my_fake_recipientChk',
+                ],
+                'my_fake_pin',
+                md5('my_fake_id11.11EURmy_fake_descriptionmy_fake_controlmy_fake_pinmy_fake_data_zapadalnoscimy_fake_data_waznoscimy_fake_recipientChk'),
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.11111,
+                    'currency' => 'EUR',
+                    'description' => 'my_fake_description',
+                    'control' => 'my_fake_control',
+                    'channel' => 'my_fake_chanel',
+                    'data_waznosci' => 'my_fake_data_waznosci',
+                    'data_zapadalnosci' => 'my_fake_data_zapadalnosci',
+                    'recipientChk' => 'my_fake_recipientChk',
+                ],
+                'my_fake_pin',
+                md5('my_fake_id11.11EURmy_fake_descriptionmy_fake_controlmy_fake_pinmy_fake_chanelmy_fake_data_zapadalnoscimy_fake_data_waznoscimy_fake_recipientChk'),
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.11111,
+                    'currency' => 'EUR',
+                    'description' => 'my_fake_description',
+                    'channel' => 'my_fake_chanel',
+                    'chlock' => 'my_fake_chlock',
+                    'data_waznosci' => 'my_fake_data_waznosci',
+                    'data_zapadalnosci' => 'my_fake_data_zapadalnosci',
+                    'recipientChk' => 'my_fake_recipientChk',
+                ],
+                'my_fake_pin',
+                md5('my_fake_id11.11EURmy_fake_descriptionmy_fake_pinmy_fake_chanelmy_fake_chlockmy_fake_data_zapadalnoscimy_fake_data_waznoscimy_fake_recipientChk'),
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.11111,
+                    'currency' => 'EUR',
+                    'description' => 'my_fake_description',
+                ],
+                'my_fake_pin',
+                md5('my_fake_id11.11EURmy_fake_descriptionmy_fake_pin'),
+            ],
+        ];
+    }
+
+    /**
+     * @param array $datas
+     * @param $pin
+     * @param $expected
+     *
+     * @dataProvider provideDataForGenerateRecipientChk
+     */
+    public function testGenerateRecipientChk(array $datas, $pin, $expected)
+    {
+        $recipientChk = $this->invokeMethod($this->dotpayDirectPlugin, 'generateRecipientChk', [$datas, $pin]);
+
+        $this->assertEquals($expected, $recipientChk);
+    }
+
+    public function provideDataForGenerateRecipientChk()
+    {
+        return [
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'control' => 'my_fake_control',
+                    'recipientAccountNumber' => 'my_fake_recipientAccountNumber',
+                    'recipientCompany' => 'my_fake_recipientCompany',
+                    'recipientFirstName' => 'my_fake_recipientFirstName',
+                    'recipientLastName' => 'my_fake_recipientLastName',
+                    'recipientAddressStreet' => 'my_fake_recipientAddressStreet',
+                    'recipientAddressBuilding' => 'my_fake_recipientAddressBuilding',
+                    'recipientAddressApartment' => 'my_fake_recipientAddressApartment',
+                    'recipientAddressPostcode' => 'my_fake_recipientAddressPostcode',
+                    'recipientAddressCity' => 'my_fake_recipientAddressCity',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_controlmy_fake_recipientAccountNumbermy_fake_recipientCompanymy_fake_recipientFirstNamemy_fake_recipientLastNamemy_fake_recipientAddressStreetmy_fake_recipientAddressBuildingmy_fake_recipientAddressApartmentmy_fake_recipientAddressPostcodemy_fake_recipientAddressCitymy_fake_pin')
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'control' => 'my_fake_control',
+                    'recipientAccountNumber' => 'my_fake_recipientAccountNumber',
+                    'recipientCompany' => 'my_fake_recipientCompany',
+                    'recipientFirstName' => 'my_fake_recipientFirstName',
+                    'recipientLastName' => 'my_fake_recipientLastName',
+                    'recipientAddressStreet' => 'my_fake_recipientAddressStreet',
+                    'recipientAddressBuilding' => 'my_fake_recipientAddressBuilding',
+                    'recipientAddressApartment' => 'my_fake_recipientAddressApartment',
+                    'recipientAddressPostcode' => 'my_fake_recipientAddressPostcode',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_controlmy_fake_recipientAccountNumbermy_fake_recipientCompanymy_fake_recipientFirstNamemy_fake_recipientLastNamemy_fake_recipientAddressStreetmy_fake_recipientAddressBuildingmy_fake_recipientAddressApartmentmy_fake_recipientAddressPostcodemy_fake_pin')
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'control' => 'my_fake_control',
+                    'recipientAccountNumber' => 'my_fake_recipientAccountNumber',
+                    'recipientCompany' => 'my_fake_recipientCompany',
+                    'recipientFirstName' => 'my_fake_recipientFirstName',
+                    'recipientLastName' => 'my_fake_recipientLastName',
+                    'recipientAddressStreet' => 'my_fake_recipientAddressStreet',
+                    'recipientAddressBuilding' => 'my_fake_recipientAddressBuilding',
+                    'recipientAddressApartment' => 'my_fake_recipientAddressApartment',
+                    'recipientAddressCity' => 'my_fake_recipientAddressCity',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_controlmy_fake_recipientAccountNumbermy_fake_recipientCompanymy_fake_recipientFirstNamemy_fake_recipientLastNamemy_fake_recipientAddressStreetmy_fake_recipientAddressBuildingmy_fake_recipientAddressApartmentmy_fake_recipientAddressCitymy_fake_pin')
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'control' => 'my_fake_control',
+                    'recipientAccountNumber' => 'my_fake_recipientAccountNumber',
+                    'recipientCompany' => 'my_fake_recipientCompany',
+                    'recipientFirstName' => 'my_fake_recipientFirstName',
+                    'recipientLastName' => 'my_fake_recipientLastName',
+                    'recipientAddressStreet' => 'my_fake_recipientAddressStreet',
+                    'recipientAddressBuilding' => 'my_fake_recipientAddressBuilding',
+                    'recipientAddressPostcode' => 'my_fake_recipientAddressPostcode',
+                    'recipientAddressCity' => 'my_fake_recipientAddressCity',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_controlmy_fake_recipientAccountNumbermy_fake_recipientCompanymy_fake_recipientFirstNamemy_fake_recipientLastNamemy_fake_recipientAddressStreetmy_fake_recipientAddressBuildingmy_fake_recipientAddressPostcodemy_fake_recipientAddressCitymy_fake_pin')
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'control' => 'my_fake_control',
+                    'recipientAccountNumber' => 'my_fake_recipientAccountNumber',
+                    'recipientCompany' => 'my_fake_recipientCompany',
+                    'recipientFirstName' => 'my_fake_recipientFirstName',
+                    'recipientLastName' => 'my_fake_recipientLastName',
+                    'recipientAddressStreet' => 'my_fake_recipientAddressStreet',
+                    'recipientAddressApartment' => 'my_fake_recipientAddressApartment',
+                    'recipientAddressPostcode' => 'my_fake_recipientAddressPostcode',
+                    'recipientAddressCity' => 'my_fake_recipientAddressCity',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_controlmy_fake_recipientAccountNumbermy_fake_recipientCompanymy_fake_recipientFirstNamemy_fake_recipientLastNamemy_fake_recipientAddressStreetmy_fake_recipientAddressApartmentmy_fake_recipientAddressPostcodemy_fake_recipientAddressCitymy_fake_pin')
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'control' => 'my_fake_control',
+                    'recipientAccountNumber' => 'my_fake_recipientAccountNumber',
+                    'recipientCompany' => 'my_fake_recipientCompany',
+                    'recipientFirstName' => 'my_fake_recipientFirstName',
+                    'recipientLastName' => 'my_fake_recipientLastName',
+                    'recipientAddressBuilding' => 'my_fake_recipientAddressBuilding',
+                    'recipientAddressApartment' => 'my_fake_recipientAddressApartment',
+                    'recipientAddressPostcode' => 'my_fake_recipientAddressPostcode',
+                    'recipientAddressCity' => 'my_fake_recipientAddressCity',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_controlmy_fake_recipientAccountNumbermy_fake_recipientCompanymy_fake_recipientFirstNamemy_fake_recipientLastNamemy_fake_recipientAddressBuildingmy_fake_recipientAddressApartmentmy_fake_recipientAddressPostcodemy_fake_recipientAddressCitymy_fake_pin')
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'control' => 'my_fake_control',
+                    'recipientAccountNumber' => 'my_fake_recipientAccountNumber',
+                    'recipientCompany' => 'my_fake_recipientCompany',
+                    'recipientFirstName' => 'my_fake_recipientFirstName',
+                    'recipientAddressStreet' => 'my_fake_recipientAddressStreet',
+                    'recipientAddressBuilding' => 'my_fake_recipientAddressBuilding',
+                    'recipientAddressApartment' => 'my_fake_recipientAddressApartment',
+                    'recipientAddressPostcode' => 'my_fake_recipientAddressPostcode',
+                    'recipientAddressCity' => 'my_fake_recipientAddressCity',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_controlmy_fake_recipientAccountNumbermy_fake_recipientCompanymy_fake_recipientFirstNamemy_fake_recipientAddressStreetmy_fake_recipientAddressBuildingmy_fake_recipientAddressApartmentmy_fake_recipientAddressPostcodemy_fake_recipientAddressCitymy_fake_pin')
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'control' => 'my_fake_control',
+                    'recipientAccountNumber' => 'my_fake_recipientAccountNumber',
+                    'recipientCompany' => 'my_fake_recipientCompany',
+                    'recipientLastName' => 'my_fake_recipientLastName',
+                    'recipientAddressStreet' => 'my_fake_recipientAddressStreet',
+                    'recipientAddressBuilding' => 'my_fake_recipientAddressBuilding',
+                    'recipientAddressApartment' => 'my_fake_recipientAddressApartment',
+                    'recipientAddressPostcode' => 'my_fake_recipientAddressPostcode',
+                    'recipientAddressCity' => 'my_fake_recipientAddressCity',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_controlmy_fake_recipientAccountNumbermy_fake_recipientCompanymy_fake_recipientLastNamemy_fake_recipientAddressStreetmy_fake_recipientAddressBuildingmy_fake_recipientAddressApartmentmy_fake_recipientAddressPostcodemy_fake_recipientAddressCitymy_fake_pin')
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'control' => 'my_fake_control',
+                    'recipientAccountNumber' => 'my_fake_recipientAccountNumber',
+                    'recipientFirstName' => 'my_fake_recipientFirstName',
+                    'recipientLastName' => 'my_fake_recipientLastName',
+                    'recipientAddressStreet' => 'my_fake_recipientAddressStreet',
+                    'recipientAddressBuilding' => 'my_fake_recipientAddressBuilding',
+                    'recipientAddressApartment' => 'my_fake_recipientAddressApartment',
+                    'recipientAddressPostcode' => 'my_fake_recipientAddressPostcode',
+                    'recipientAddressCity' => 'my_fake_recipientAddressCity',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_controlmy_fake_recipientAccountNumbermy_fake_recipientFirstNamemy_fake_recipientLastNamemy_fake_recipientAddressStreetmy_fake_recipientAddressBuildingmy_fake_recipientAddressApartmentmy_fake_recipientAddressPostcodemy_fake_recipientAddressCitymy_fake_pin')
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'control' => 'my_fake_control',
+                    'recipientCompany' => 'my_fake_recipientCompany',
+                    'recipientFirstName' => 'my_fake_recipientFirstName',
+                    'recipientLastName' => 'my_fake_recipientLastName',
+                    'recipientAddressStreet' => 'my_fake_recipientAddressStreet',
+                    'recipientAddressBuilding' => 'my_fake_recipientAddressBuilding',
+                    'recipientAddressApartment' => 'my_fake_recipientAddressApartment',
+                    'recipientAddressPostcode' => 'my_fake_recipientAddressPostcode',
+                    'recipientAddressCity' => 'my_fake_recipientAddressCity',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_controlmy_fake_recipientCompanymy_fake_recipientFirstNamemy_fake_recipientLastNamemy_fake_recipientAddressStreetmy_fake_recipientAddressBuildingmy_fake_recipientAddressApartmentmy_fake_recipientAddressPostcodemy_fake_recipientAddressCitymy_fake_pin')
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'control' => 'my_fake_control',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_controlmy_fake_pin')
+            ],
+            [
+                [
+                    'id' => 'my_fake_id',
+                    'amount' => 11.1111,
+                    'currency' => 'EUR',
+                    'recipientAccountNumber' => 'my_fake_recipientAccountNumber',
+                    'recipientCompany' => 'my_fake_recipientCompany',
+                    'recipientFirstName' => 'my_fake_recipientFirstName',
+                    'recipientLastName' => 'my_fake_recipientLastName',
+                    'recipientAddressStreet' => 'my_fake_recipientAddressStreet',
+                    'recipientAddressBuilding' => 'my_fake_recipientAddressBuilding',
+                    'recipientAddressApartment' => 'my_fake_recipientAddressApartment',
+                    'recipientAddressPostcode' => 'my_fake_recipientAddressPostcode',
+                    'recipientAddressCity' => 'my_fake_recipientAddressCity',
+                ],
+                'my_fake_pin',
+                hash('sha256', 'my_fake_id11.11EURmy_fake_recipientAccountNumbermy_fake_recipientCompanymy_fake_recipientFirstNamemy_fake_recipientLastNamemy_fake_recipientAddressStreetmy_fake_recipientAddressBuildingmy_fake_recipientAddressApartmentmy_fake_recipientAddressPostcodemy_fake_recipientAddressCitymy_fake_pin')
+            ],
+        ];
+    }
+
+    /**
+     * Call protected/private method of a class.
+     *
+     * @param object &$object    Instantiated object that we will run method on.
+     * @param string $methodName Method name to call
+     * @param array  $parameters Array of parameters to pass into method.
+     *
+     * @return mixed Method return.
+     */
+    private function invokeMethod(&$object, $methodName, array $parameters = array())
+    {
+        $reflection = new \ReflectionClass(get_class($object));
+        $method = $reflection->getMethod($methodName);
+        $method->setAccessible(true);
+
+        return $method->invokeArgs($object, $parameters);
     }
 }
