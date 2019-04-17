@@ -43,4 +43,12 @@ class DirectType extends AbstractType
     {
         return 'dotpay_direct';
     }
+
+    /**
+     * @return string
+     */
+    public function getBlockPrefix()
+    {
+        return $this->getName();
+    }
 }

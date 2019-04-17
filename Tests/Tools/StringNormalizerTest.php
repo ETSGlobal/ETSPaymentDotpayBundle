@@ -3,6 +3,7 @@
 namespace ETS\PurchaseBundle\Tests\Tools;
 
 use ETS\Payment\DotpayBundle\Tools\StringNormalizer;
+use PHPUnit\Framework\TestCase;
 
 /*
  * Copyright 2012 ETSGlobal <ecs@etsglobal.org>
@@ -25,7 +26,7 @@ use ETS\Payment\DotpayBundle\Tools\StringNormalizer;
  *
  * @author ETSGlobal <ecs@etsglobal.org>
  */
-class StringNormalizerTest extends \PHPUnit_Framework_TestCase
+class StringNormalizerTest extends TestCase
 {
     /**
      * @return array
