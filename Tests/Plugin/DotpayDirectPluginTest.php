@@ -22,6 +22,7 @@ namespace ETS\PurchaseBundle\Tests\Plugin;
 use ETS\Payment\DotpayBundle\Plugin\DotpayDirectPlugin;
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
 use JMS\Payment\CoreBundle\Plugin\PluginInterface;
+use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 
 /**
@@ -29,7 +30,7 @@ use Prophecy\Argument;
  *
  * @author ETSGlobal <ecs@etsglobal.org>
  */
-class DotpayDirectPluginTest extends \PHPUnit_Framework_TestCase
+class DotpayDirectPluginTest extends TestCase
 {
     public function setUp()
     {
