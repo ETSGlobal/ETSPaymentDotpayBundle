@@ -94,7 +94,7 @@ class CallbackController extends Controller
             // this could happen if the transaction is already validated via http redirection
 
             if ($instruction->getAmount() < $instruction->getDepositedAmount()) {
-                $logger->error(
+                $logger->info(
                     '[Dotpay - URLC - {dotpayTransactionId}] unable to create new transaction, all of amount has been deposited',
                     [
                         'paymentInstructionId' => $instruction->getId(),
@@ -106,7 +106,7 @@ class CallbackController extends Controller
                 return new Response('FAIL, TRANSACTION IS COMPLETED', 500);
             }
 
-            $logger->error(
+            $logger->info(
                 '[Dotpay - URLC - {dotpayTransactionId}] no pending transaction found for the payment instruction',
                 [
                     'paymentInstructionId' => $instruction->getId(),

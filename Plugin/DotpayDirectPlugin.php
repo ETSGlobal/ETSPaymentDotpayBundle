@@ -173,10 +173,10 @@ class DotpayDirectPlugin extends AbstractPlugin
             'URLC'              => $urlc,
             'type'              => $this->type,
             'onlinetransfer'    => $this->onlineTransfer ? 1 : 0,
-            'amount'      => $transaction->getRequestedAmount(),
-            'currency'    => $instruction->getCurrency(),
-            'description' => sprintf('Payment Instruction #%d', $instruction->getId()),
-            'data_waznosci' => $this->expirationTime > 0 ? date('Y-m-d H:i:s', time() + $this->expirationTime * 60) : null,
+            'amount'            => $transaction->getRequestedAmount(),
+            'currency'          => $instruction->getCurrency(),
+            'description'       => sprintf('Payment Instruction #%d', $instruction->getId()),
+            'data_waznosci'     => $this->expirationTime > 0 ? date('Y-m-d H:i:s', time() + $this->expirationTime * 60) : null,
             'data_zapadalnosci' => null,
         ];
 
@@ -297,7 +297,7 @@ class DotpayDirectPlugin extends AbstractPlugin
 
         $key .= $pin;
 
-        return hash( 'sha256', $key);
+        return hash('sha256', $key);
     }
 
     /**
