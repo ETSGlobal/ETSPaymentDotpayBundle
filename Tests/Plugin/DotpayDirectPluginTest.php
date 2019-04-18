@@ -273,11 +273,15 @@ class DotpayDirectPluginTest extends TestCase
     }
 
     /**
+     * @param array $data
+     * @param $pin
+     * @param $expected
+     *
      * @dataProvider provideDataForGenerateChk
      */
-    public function testGenerateChk(array $datas, $pin, $expected)
+    public function testGenerateChk(array $data, $pin, $expected)
     {
-        $chk = $this->invokeMethod($this->dotpayDirectPlugin, 'generateChk', [$datas, $pin]);
+        $chk = $this->invokeMethod($this->dotpayDirectPlugin, 'generateChk', [$data, $pin]);
 
         $this->assertEquals($expected, $chk);
     }
@@ -405,15 +409,15 @@ class DotpayDirectPluginTest extends TestCase
     }
 
     /**
-     * @param array $datas
+     * @param array $data
      * @param $pin
      * @param $expected
      *
      * @dataProvider provideDataForGenerateRecipientChk
      */
-    public function testGenerateRecipientChk(array $datas, $pin, $expected)
+    public function testGenerateRecipientChk(array $data, $pin, $expected)
     {
-        $recipientChk = $this->invokeMethod($this->dotpayDirectPlugin, 'generateRecipientChk', [$datas, $pin]);
+        $recipientChk = $this->invokeMethod($this->dotpayDirectPlugin, 'generateRecipientChk', [$data, $pin]);
 
         $this->assertEquals($expected, $recipientChk);
     }
