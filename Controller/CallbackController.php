@@ -50,9 +50,16 @@ class CallbackController extends Controller
         $logger = $this->get('logger');
         $ppc = $this->get('payment.plugin_controller');
 
+        $logger->info(
+            '[Dotpay - URLC - {dotpayTransactionId}] Callback received: {request}',
+            [
+                'paymentInstructionId' => $instruction->getId(),
+                'request' => $request->request->all(),
+            ]
+        );
+
         $transactionId = $request->request->get('t_id');
         $transactionStatus = $request->request->get('t_status');
-        $amount = (float) $request->get('amount');
 
         // Check the PIN
         $control = md5(sprintf(
@@ -84,6 +91,8 @@ class CallbackController extends Controller
         }
 
         if (null === $transaction = $instruction->getPendingTransaction()) {
+            // this could happen if the transaction is already validated via http redirection
+
             if ($instruction->getAmount() < $instruction->getDepositedAmount()) {
                 $logger->error(
                     '[Dotpay - URLC - {dotpayTransactionId}] unable to create new transaction, all of amount has been deposited',
@@ -98,31 +107,17 @@ class CallbackController extends Controller
             }
 
             $logger->error(
-                '[Dotpay - URLC - {dotpayTransactionId}] no pending transaction found for the payment instruction, creating new one',
+                '[Dotpay - URLC - {dotpayTransactionId}] no pending transaction found for the payment instruction',
                 [
                     'paymentInstructionId' => $instruction->getId(),
                     'dotpayTransactionId' => $transactionId,
                     'dotpayTransactionStatus' => $transactionStatus,
                 ]
             );
-
-            $payment = $ppc->createPayment($instruction->getId(), $amount);
-            $ppc->approveAndDeposit($payment->getId(), $amount);
-            $transaction = $payment->getPendingTransaction();
-
-            if (null === $transaction) {
-                $logger->err(
-                    '[Dotpay - URLC - {dotpayTransactionId}] error while creating new transaction',
-                    [
-                        'paymentInstructionId' => $instruction->getId(),
-                        'dotpayTransactionId' => $transactionId,
-                        'dotpayTransactionStatus' => $transactionStatus,
-                    ]
-                );
-
-                return new Response('FAIL CREATING NEW TRANSACTION', 500);
-            }
         }
+
+        $amountParts = explode(' ', $request->get('orginal_amount')); // Yes, the right parameter is 'orginal_amount'
+        $amount = (float) $amountParts[0]; // there is a typo error in the DotPay API
 
         $transaction->getExtendedData()->set('t_status', $transactionStatus);
         $transaction->getExtendedData()->set('t_id', $transactionId);
