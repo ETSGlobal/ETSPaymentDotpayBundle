@@ -1,6 +1,6 @@
 ets_payment_dotpay_callback_urlc:
     path:  /transaction/{id}/urlc
-    controller: ETSPaymentDotpayBundle\Controller\CallbackController::urlc
+    defaults: { _controller: ETSPaymentDotpayBundle:Callback:urlc }
     methods: [GET, POST]
     requirements:
         id: \d+
