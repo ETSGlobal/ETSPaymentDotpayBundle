@@ -114,10 +114,12 @@ class CallbackController extends Controller
                     'dotpayTransactionStatus' => $transactionStatus,
                 ]
             );
+
+            return new Response('FAIL', 500);
         }
 
         $amountParts = explode(' ', $request->get('orginal_amount')); // Yes, the right parameter is 'orginal_amount'
-        $amount = (float) $amountParts[0]; // there is a typo error in the DotPay API
+        $amount = (float) $amountParts[0];                            // there is a typo error in the DotPay API
 
         $transaction->getExtendedData()->set('t_status', $transactionStatus);
         $transaction->getExtendedData()->set('t_id', $transactionId);
