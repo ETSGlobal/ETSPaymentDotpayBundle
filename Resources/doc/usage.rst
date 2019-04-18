@@ -49,4 +49,4 @@ an easy way to communicate with the Dotpay API, then you can use the plugin dire
 
     $plugin = $container->get('payment.plugin.dotpay');
 
-.. _JMSPaymentCoreBundle: https://github.com/schmittjoh/JMSPaymentCoreBundle/blob/master/Resources/doc/index.rst
+
