@@ -51,44 +51,44 @@ class DotpayDirectPlugin extends AbstractPlugin
     const STATUS_REFUND = 4;
     const STATUS_COMPLAINT = 5;
 
-    public static $statuses = array(
+    public static $statuses = [
         self::STATUS_CLOSED    => 'Closed',
         self::STATUS_NEW       => 'New',
         self::STATUS_DONE      => 'Done',
         self::STATUS_REJECTED  => 'Rejected',
         self::STATUS_REFUND    => 'Refund',
         self::STATUS_COMPLAINT => 'Complaint',
-    );
+    ];
 
-    /**
-     * @var Router
-     */
+    /** @var Router */
     protected $router;
 
-    /**
-     * @var \ETS\Payment\DotpayBundle\Client\Token
-     */
+    /** @var \ETS\Payment\DotpayBundle\Client\Token */
     protected $token;
 
-    /**
-     * @var \ETS\Payment\DotpayBundle\Tools\StringNormalizer
-     */
+    /** @var \ETS\Payment\DotpayBundle\Tools\StringNormalizer */
     protected $stringTools;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $url;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $returnUrl;
 
-    /**
-     * @var integer
-     */
+    /** @var integer */
     protected $type;
+
+    /** @var bool */
+    protected $chk;
+
+    /** @var bool */
+    protected $recipientChk;
+
+    /** @var bool */
+    protected $onlineTransfer;
+
+    /** @var bool */
+    protected $expirationTime;
 
     /**
      * @param Router            $router      The router
@@ -97,15 +97,33 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @param string            $url         The urlc
      * @param int               $type        The type
      * @param string            $returnUrl   The return url
+     * @param bool              $chk         Using DotPay CHK parameter, by default false
+     * @param bool              $recipientChk
+     * @param bool              $onlineTransfer
+     * @param int               $expirationTime
      */
-    public function __construct(Router $router, Token $token, StringNormalizer $stringTools, $url, $type, $returnUrl)
-    {
+    public function __construct(
+        Router $router,
+        Token $token,
+        StringNormalizer $stringTools,
+        $url,
+        $type,
+        $returnUrl,
+        $chk = false,
+        $recipientChk = false,
+        $onlineTransfer = false,
+        $expirationTime = 0
+    ) {
         $this->router = $router;
         $this->token = $token;
         $this->stringTools = $stringTools;
         $this->returnUrl = $returnUrl;
         $this->url = $url;
         $this->type = $type;
+        $this->chk = $chk;
+        $this->recipientChk = $recipientChk;
+        $this->onlineTransfer = $onlineTransfer;
+        $this->expirationTime = $expirationTime;
     }
 
     /**
@@ -143,39 +161,143 @@ class DotpayDirectPlugin extends AbstractPlugin
         $instruction = $transaction->getPayment()->getPaymentInstruction();
 
         $extendedData = $transaction->getExtendedData();
-        $urlc         = $this->router->generate('ets_payment_dotpay_callback_urlc', array(
-            'id' => $instruction->getId()
-        ), true);
+        $urlc         = $this->router->generate(
+            'ets_payment_dotpay_callback_urlc',
+            ['id' => $instruction->getId()],
+            true
+        );
 
-        $datas = array(
+        $data = [
             'id'                => $this->token->getId(),
-            'url'               => $this->getReturnUrl($extendedData),
+            'URL'               => $this->getReturnUrl($extendedData),
             'URLC'              => $urlc,
             'type'              => $this->type,
+            'onlinetransfer'    => $this->onlineTransfer ? 1 : 0,
+            'amount'            => $transaction->getRequestedAmount(),
+            'currency'          => $instruction->getCurrency(),
+            'description'       => sprintf('Payment Instruction #%d', $instruction->getId()),
+            'data_waznosci'     => $this->expirationTime > 0 ? date('Y-m-d H:i:s', time() + $this->expirationTime * 60) : null,
+            'data_zapadalnosci' => null,
+        ];
 
-            'amount'      => $transaction->getRequestedAmount(),
-            'currency'    => $instruction->getCurrency(),
-            'description' => sprintf('Payment Instruction #%d', $instruction->getId()),
-        );
+        $additionalData = [
+            'street', 'phone', 'postcode', 'lastname', 'firstname',
+            'email', 'country', 'city', 'grupykanalow', 'street_n1', 'street_n2', 'description',
+        ];
 
-        $additionalDatas = array(
-            'street', 'phone', 'postcode', 'lastname',
-            'firstname', 'email', 'country', 'city', 'grupykanalow',
-        );
+        if ($this->recipientChk) {
+            $additionalData = array_merge($additionalData, [
+                'recipientAccountNumber', 'recipientCompany', 'recipientFirstName', 'recipientLastName', 'recipientAddressStreet',
+                'recipientAddressBuilding', 'recipientAddressApartment', 'recipientAddressPostcode', 'recipientAddressCity',
+            ]);
+        }
 
-        foreach ($additionalDatas as $value) {
+        foreach ($additionalData as $value) {
             if ($extendedData->has($value)) {
-                $datas[$value] = $this->stringTools->normalize($extendedData->get($value));
+                $data[$value] = $this->stringTools->normalize($extendedData->get($value));
             }
         }
 
         if ($extendedData->has('lang')) {
-            $datas['lang'] = substr($extendedData->get('lang'), 0, 2);
+            $data['lang'] = substr($extendedData->get('lang'), 0, 2);
         }
 
-        $actionRequest->setAction(new VisitUrl($this->url . '?' . http_build_query($datas)));
+        if ($this->recipientChk) {
+            $data['recipientChk'] = $this->generateRecipientChk($data, $this->token->getPin());
+        }
+
+        if ($this->chk) {
+            $data['chk'] = $this->generateChk($data, $this->token->getPin());
+        }
+
+        $actionRequest->setAction(new VisitUrl($this->url . '?' . http_build_query($data)));
 
         return $actionRequest;
+    }
+
+    /**
+     * This method generates chk parameter user to sign request to dotpay
+     *
+     * @param array $data
+     * @param string $pin
+     *
+     * @return string
+     */
+    protected function generateChk(array $data, $pin)
+    {
+        $key =  $data['id'];
+        $key .= number_format($data['amount'], 2, '.', '');
+        $key .= $data['currency'];
+        $key .= rawurlencode($data['description']);
+
+        if (isset($data['control'])) {
+            $key .= $data['control'];
+        }
+
+        $key .= $pin;
+
+        if (isset($data['channel'])) {
+            $key .= $data['channel'];
+
+            if (isset($data['chlock'])) {
+                $key .= $data['chlock'];
+            }
+        }
+
+        if (isset($data['data_waznosci'])) {
+            if (isset($data['data_zapadalnosci'])) {
+                $key .= $data['data_zapadalnosci'];
+            }
+
+            $key .= $data['data_waznosci'];
+        }
+
+        if (isset($data['recipientChk'])) {
+            $key .= $data['recipientChk'];
+        }
+
+        return md5($key);
+    }
+
+    /**
+     * This method generates recipientChk parameter user to sign request with recipient data to dotpay
+     *
+     * @param array $data
+     * @param string $pin
+     *
+     * @return string
+     */
+    protected function generateRecipientChk(array $data, $pin)
+    {
+        $key =  $data['id'];
+        $key .= number_format($data['amount'], 2, '.', '');
+        $key .= $data['currency'];
+
+        if (isset($data['control'])) {
+            $key .= $data['control'];
+        }
+
+        $recipientFields = [
+            'recipientAccountNumber',
+            'recipientCompany',
+            'recipientFirstName',
+            'recipientLastName',
+            'recipientAddressStreet',
+            'recipientAddressBuilding',
+            'recipientAddressApartment',
+            'recipientAddressPostcode',
+            'recipientAddressCity',
+        ];
+
+        foreach ($recipientFields as $f) {
+            if (isset($data[$f])) {
+                $key .= $data[$f];
+            }
+        }
+
+        $key .= $pin;
+
+        return hash('sha256', $key);
     }
 
     /**

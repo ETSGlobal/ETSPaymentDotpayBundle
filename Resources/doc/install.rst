@@ -36,3 +36,5 @@ Routing
     //YAML routing.yml
     ets_payment_dotpay_bundle:
         resource: "@ETSPaymentDotpayBundle/Resources/config/routing.yml"
+
+.. _JMSPaymentCoreBundle: https://github.com/schmittjoh/JMSPaymentCoreBundle/blob/master/Resources/doc/index.rst

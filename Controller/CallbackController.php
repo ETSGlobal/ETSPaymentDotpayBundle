@@ -48,6 +48,15 @@ class CallbackController extends Controller
 
         $client = $this->get('payment.dotpay.client.token');
         $logger = $this->get('logger');
+        $ppc = $this->get('payment.plugin_controller');
+
+        $logger->info(
+            '[Dotpay - URLC - {dotpayTransactionId}] Callback received: {request}',
+            [
+                'paymentInstructionId' => $instruction->getId(),
+                'request' => $request->request->all(),
+            ]
+        );
 
         $transactionId = $request->request->get('t_id');
         $transactionStatus = $request->request->get('t_status');
@@ -70,26 +79,40 @@ class CallbackController extends Controller
 
         if ($control !== $request->request->get('md5')) {
             $logger->error(
-                '[Dotpay - URLC] pin verification failed',
-                array(
+                '[Dotpay - URLC - {dotpayTransactionId}] pin verification failed',
+                [
                     'paymentInstructionId' => $instruction->getId(),
                     'dotpayTransactionId' => $transactionId,
                     'dotpayTransactionStatus' => $transactionStatus,
-                )
+                ]
             );
 
-            return new Response('FAIL', 500);
+            return new Response('FAIL SIGNATURE', 500);
         }
 
         if (null === $transaction = $instruction->getPendingTransaction()) {
             // this could happen if the transaction is already validated via http redirection
+
+            if ($instruction->getAmount() < $instruction->getDepositedAmount()) {
+                $logger->info(
+                    '[Dotpay - URLC - {dotpayTransactionId}] unable to create new transaction, all of amount has been deposited',
+                    [
+                        'paymentInstructionId' => $instruction->getId(),
+                        'dotpayTransactionId' => $transactionId,
+                        'dotpayTransactionStatus' => $transactionStatus,
+                    ]
+                );
+
+                return new Response('FAIL, TRANSACTION IS COMPLETED', 500);
+            }
+
             $logger->info(
-                '[Dotpay - URLC] no pending transaction found for the payment instruction',
-                array(
+                '[Dotpay - URLC - {dotpayTransactionId}] no pending transaction found for the payment instruction',
+                [
                     'paymentInstructionId' => $instruction->getId(),
                     'dotpayTransactionId' => $transactionId,
                     'dotpayTransactionStatus' => $transactionStatus,
-                )
+                ]
             );
 
             return new Response('FAIL', 500);
@@ -103,31 +126,31 @@ class CallbackController extends Controller
         $transaction->getExtendedData()->set('amount', $amount);
 
         try {
-            $this->get('payment.plugin_controller')->approveAndDeposit($transaction->getPayment()->getId(), $amount);
+            $ppc->approveAndDeposit($transaction->getPayment()->getId(), $amount);
         } catch (\Exception $exception) {
             $logger->error(
-                '[Dotpay - URLC] error {exceptionClass} {exceptionMessage}',
-                array(
+                '[Dotpay - URLC - {dotpayTransactionId}] error {exceptionClass} {exceptionMessage}',
+                [
                     'paymentInstructionId' => $instruction->getId(),
                     'dotpayTransactionId' => $transactionId,
                     'dotpayTransactionStatus' => $transactionStatus,
                     'exceptionClass' => get_class($exception),
-                    'exceptionMessage' => $e->getMessage()
-                )
+                    'exceptionMessage' => $exception->getMessage(),
+                ]
             );
 
-            return new Response('FAIL', 500);
+            return new Response('FAIL APPROVE AND DEPOSIT', 500);
         }
 
         $this->getDoctrine()->getManager()->flush();
 
         $logger->info(
-            '[Dotpay - URLC] Payment instruction {paymentInstructionId} successfully updated',
-            array(
+            '[Dotpay - URLC - {dotpayTransactionId}] Payment instruction {paymentInstructionId} successfully updated',
+            [
                 'paymentInstructionId' => $instruction->getId(),
                 'dotpayTransactionId' => $transactionId,
-                'dotpayTransactionStatus' => $transactionStatus
-            )
+                'dotpayTransactionStatus' => $transactionStatus,
+            ]
         );
 
         return new Response('OK');

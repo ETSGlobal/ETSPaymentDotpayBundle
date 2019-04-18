@@ -3,7 +3,7 @@ ETSPaymentDotpayBundle [![Build Status](https://travis-ci.org/ETSGlobal/ETSPayme
 
 This is an extension to the CorePaymentBundle providing access to Dotpay.
 
-Instalation:
+Installation:
 [Resources/doc/install](https://github.com/ETSGlobal/ETSPaymentDotpayBundle/blob/master/Resources/doc/install.rst)
 
 Usage:
