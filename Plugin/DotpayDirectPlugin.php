@@ -90,6 +90,9 @@ class DotpayDirectPlugin extends AbstractPlugin
     /** @var bool */
     protected $expirationTime;
 
+    /** @var string */
+    protected $callBackUrl;
+
     /**
      * @param Router            $router      The router
      * @param Token             $token       The client token
@@ -101,6 +104,7 @@ class DotpayDirectPlugin extends AbstractPlugin
      * @param bool              $recipientChk
      * @param bool              $onlineTransfer
      * @param int               $expirationTime
+     * @param string            $callBackUrl
      */
     public function __construct(
         Router $router,
@@ -112,7 +116,8 @@ class DotpayDirectPlugin extends AbstractPlugin
         $chk = false,
         $recipientChk = false,
         $onlineTransfer = false,
-        $expirationTime = 0
+        $expirationTime = 0,
+        $callBackUrl = null
     ) {
         $this->router = $router;
         $this->token = $token;
@@ -124,6 +129,7 @@ class DotpayDirectPlugin extends AbstractPlugin
         $this->recipientChk = $recipientChk;
         $this->onlineTransfer = $onlineTransfer;
         $this->expirationTime = $expirationTime;
+        $this->callBackUrl = $callBackUrl;
     }
 
     /**
@@ -161,11 +167,7 @@ class DotpayDirectPlugin extends AbstractPlugin
         $instruction = $transaction->getPayment()->getPaymentInstruction();
 
         $extendedData = $transaction->getExtendedData();
-        $urlc         = $this->router->generate(
-            'ets_payment_dotpay_callback_urlc',
-            ['id' => $instruction->getId()],
-            true
-        );
+        $urlc = $this->getCallBackUrl($instruction, 'ets_payment_dotpay_callback_urlc');
 
         $data = [
             'id'                => $this->token->getId(),
@@ -496,5 +498,22 @@ class DotpayDirectPlugin extends AbstractPlugin
         }
 
         throw new \RuntimeException('You must configure a return url.');
+    }
+
+    private function getCallBackUrl(PaymentInstructionInterface $instruction, $route)
+    {
+        if ($this->callBackUrl) {
+            return $this->callBackUrl.$this->router->generate(
+                $route,
+                ['id' => $instruction->getId()],
+                Router::RELATIVE_PATH
+            );
+        }
+
+        return $this->router->generate(
+            $route,
+            ['id' => $instruction->getId()],
+            Router::ABSOLUTE_PATH
+        );
     }
 }
