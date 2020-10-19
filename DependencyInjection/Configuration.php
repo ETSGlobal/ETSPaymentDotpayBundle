@@ -76,6 +76,7 @@ class Configuration implements ConfigurationInterface
                             ->integerNode('expirationTime')
                                 ->defaultValue(0)
                             ->end()
+                            ->scalarNode('callback_base_url')->defaultNull()->end()
                         ->end()
                     ->end()
                 ->end()
