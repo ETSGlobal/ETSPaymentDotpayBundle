@@ -20,10 +20,16 @@ namespace ETS\PurchaseBundle\Tests\Plugin;
  */
 
 use ETS\Payment\DotpayBundle\Plugin\DotpayDirectPlugin;
+use JMS\Payment\CoreBundle\Entity\Payment;
+use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
+use JMS\Payment\CoreBundle\Model\PaymentInstructionInterface;
+use JMS\Payment\CoreBundle\Plugin\Exception\ActionRequiredException;
 use JMS\Payment\CoreBundle\Plugin\PluginInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Router;
 
 /**
  * Dotpay payment plugin
@@ -52,6 +58,82 @@ class DotpayDirectPluginTest extends TestCase
             $type,
             $returnUrl
         );
+    }
+
+    public function testSuccessWithCallBackUrl()
+    {
+        $this->expectException(ActionRequiredException::class);
+        $t_status = DotpayDirectPlugin::STATUS_NEW;
+        $t_id = 1;
+        $amount = 10;
+
+        $extendedData = $this->prophesize('JMS\Payment\CoreBundle\Entity\ExtendedData');
+        $extendedData->has('return_url')->shouldBeCalled()->willReturn('return url');
+        $extendedData->has('street')->shouldBeCalled()->willReturn('street');
+        $extendedData->has('phone')->shouldBeCalled()->willReturn('phone');
+        $extendedData->has('postcode')->shouldBeCalled()->willReturn('postcode');
+        $extendedData->has('lastname')->shouldBeCalled()->willReturn('lastname');
+        $extendedData->has('firstname')->shouldBeCalled()->willReturn('firstname');
+        $extendedData->has('email')->shouldBeCalled()->willReturn('email');
+        $extendedData->has('country')->shouldBeCalled()->willReturn('country');
+        $extendedData->has('city')->shouldBeCalled()->willReturn('city');
+        $extendedData->has('grupykanalow')->shouldBeCalled()->willReturn('grupykanalow');
+        $extendedData->has('street_n1')->shouldBeCalled()->willReturn('street_n1');
+        $extendedData->has('street_n2')->shouldBeCalled()->willReturn('street_n2');
+        $extendedData->has('description')->shouldBeCalled()->willReturn('description');
+        $extendedData->has('lang')->shouldBeCalled()->willReturn('lang');
+        $extendedData->get('return_url')->shouldBeCalled()->willReturn('return url');
+        $extendedData->get('street')->shouldBeCalled()->willReturn('street');
+        $extendedData->get('phone')->shouldBeCalled()->willReturn('phone');
+        $extendedData->get('postcode')->shouldBeCalled()->willReturn('postcode');
+        $extendedData->get('lastname')->shouldBeCalled()->willReturn('lastname');
+        $extendedData->get('firstname')->shouldBeCalled()->willReturn('firstname');
+        $extendedData->get('email')->shouldBeCalled()->willReturn('email');
+        $extendedData->get('country')->shouldBeCalled()->willReturn('country');
+        $extendedData->get('city')->shouldBeCalled()->willReturn('city');
+        $extendedData->get('grupykanalow')->shouldBeCalled()->willReturn('grupykanalow');
+        $extendedData->get('street_n1')->shouldBeCalled()->willReturn('street_n1');
+        $extendedData->get('street_n2')->shouldBeCalled()->willReturn('street_n2');
+        $extendedData->get('description')->shouldBeCalled()->willReturn('description');
+        $extendedData->get('lang')->shouldBeCalled()->willReturn('lang');
+
+        $paymentInstruction = $this->prophesize(PaymentInstructionInterface::class);
+        $paymentInstruction->getId()->shouldBeCalled()->willReturn(10);
+        $paymentInstruction->getCurrency()->shouldBeCalled()->willReturn('currency');
+
+        $payment = $this->prophesize(Payment::class);
+        $payment->getPaymentInstruction()->shouldBeCalled()->willReturn($paymentInstruction->reveal());
+
+        $financialTransaction = $this->prophesize('JMS\Payment\CoreBundle\Model\FinancialTransactionInterface');
+        $financialTransaction->getExtendedData()->shouldBeCalled()->willReturn($extendedData->reveal());
+        $financialTransaction->getState()->shouldBeCalled()->willReturn(FinancialTransactionInterface::STATE_NEW);
+        $financialTransaction->getPayment()->shouldBeCalled()->willReturn($payment->reveal());
+        $financialTransaction->getRequestedAmount()->shouldBeCalled()->willReturn(10);
+
+        $url = 'urlTest';
+        $type = 1;
+        $returnUrl = 'returnUrlTest';
+        $callBackUrl = 'callBackUrlTest';
+
+        $requestContext = $this->prophesize(RequestContext::class);
+        $requestContext->setBaseUrl('callBackUrlTest')->shouldBeCalled();
+        $this->router->getContext()->shouldBeCalled()->willReturn($requestContext->reveal());
+        $this->router->generate('ets_payment_dotpay_callback_urlc', ['id' => 10], Router::ABSOLUTE_PATH)->shouldBeCalled()->willReturn('url call back');
+
+        $dotpayDirectPlugin = new DotpayDirectPlugin(
+            $this->router->reveal(),
+            $this->token->reveal(),
+            $this->stringNormalizer->reveal(),
+            $url,
+            $type,
+            $returnUrl,
+            null,
+            null,
+            null,
+            null,
+            $callBackUrl
+        );
+        $dotpayDirectPlugin->approveAndDeposit($financialTransaction->reveal(), false);
     }
 
     public function testSuccess()

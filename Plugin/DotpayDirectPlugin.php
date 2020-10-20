@@ -503,11 +503,7 @@ class DotpayDirectPlugin extends AbstractPlugin
     private function getCallBackUrl(PaymentInstructionInterface $instruction, $route)
     {
         if ($this->callBackUrl) {
-            return $this->callBackUrl.$this->router->generate(
-                $route,
-                ['id' => $instruction->getId()],
-                Router::RELATIVE_PATH
-            );
+            $this->router->getContext()->setBaseUrl($this->callBackUrl);
         }
 
         return $this->router->generate(
